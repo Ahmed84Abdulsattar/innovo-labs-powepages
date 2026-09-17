@@ -25,6 +25,7 @@ Mirrors the layout produced by `pac pages download`, pruned to what was authored
 | `page-templates/` | Page-template records binding pages to web templates |
 | `table-permissions/` | Dataverse table permissions per web role |
 | `content-snippets/`, `weblink-sets/` | Site-level content records |
+| `flows/` | The four Power Automate flow definitions, exported from the `InnovoLabsMicrosite` solution |
 | `*.yml` | Website, languages, publishing states, site markers, site settings, web roles, page access rules |
 
 ### Web templates
@@ -48,6 +49,23 @@ Nine content tables in Dataverse, all prefixed `innovo_`: idea, idea activity, c
 Reads happen at render time in Liquid. The news hub is the one exception: it server-renders the first page and pages further through the Power Pages Web API.
 
 Ideas are written by the submission flow, not by the site. SharePoint is where the programme team works; Dataverse is what the site reads. A flow mirrors status changes and comments between them.
+
+## Power Automate flows
+
+Definitions in `flows/` are the standard export shape — `properties.connectionReferences` and `properties.definition` — pretty-printed for review.
+
+| Flow | Trigger | Does |
+|---|---|---|
+| `idea-submission` | HTTP request from the form | Creates the SharePoint item, resolves the submitter's contact, creates the Dataverse row, sends the confirmation email |
+| `idea-status-update` | SharePoint item modified | Updates the Dataverse status, logs an activity, sends the status email |
+| `idea-activity-sync` | SharePoint item created | Mirrors reviewer comments into Dataverse activity rows |
+| `recount-ideas` | Dataverse idea created, updated or deleted | Rewrites the submitted-ideas count on the tracker snapshot |
+
+`idea-status-update` ends by writing a "status notified" field back to SharePoint, which re-triggers it. A condition at the top catches the second run and stops; without it the flow would loop.
+
+Two field limits shape the submission form: the SharePoint built-in `Title` column is fixed at 255 characters, and a Dataverse Text column at 4000. The form caps its inputs to match, since a value over either limit fails the create silently from the submitter's side.
+
+**On import**, connection references must be bound to connections in the target environment, and the form's `FLOW_URL` set to the new HTTP trigger address. The SharePoint site in `dataset` values is a placeholder.
 
 ## Security model
 
@@ -92,4 +110,4 @@ pac pages upload --path . --modelVersion 2
 
 - Media — images, fonts and video web files. They are referenced by URL from Dataverse rows and site config.
 - Microsoft's default web templates, web files and the `.portalconfig` deployment manifest.
-- Power Automate flow definitions and Dataverse table schema — those live in the environment's solution.
+- Dataverse table schema and connection definitions — those live in the environment's solution.

@@ -1,0 +1,369 @@
+{
+    "properties":  {
+                       "connectionReferences":  {
+                                                    "shared_sharepointonline":  {
+                                                                                    "runtimeSource":  "embedded",
+                                                                                    "connection":  {
+                                                                                                       "connectionReferenceLogicalName":  "new_sharedsharepointonline_8f10c"
+                                                                                                   },
+                                                                                    "api":  {
+                                                                                                "name":  "shared_sharepointonline"
+                                                                                            }
+                                                                                },
+                                                    "shared_office365":  {
+                                                                             "runtimeSource":  "embedded",
+                                                                             "connection":  {
+                                                                                                "connectionReferenceLogicalName":  "new_sharedoffice365_98fd9"
+                                                                                            },
+                                                                             "api":  {
+                                                                                         "name":  "shared_office365"
+                                                                                     }
+                                                                         },
+                                                    "shared_commondataserviceforapps":  {
+                                                                                            "runtimeSource":  "embedded",
+                                                                                            "connection":  {
+                                                                                                               "connectionReferenceLogicalName":  "new_sharedcommondataserviceforapps_cfbb3"
+                                                                                                           },
+                                                                                            "api":  {
+                                                                                                        "name":  "shared_commondataserviceforapps"
+                                                                                                    }
+                                                                                        }
+                                                },
+                       "definition":  {
+                                          "$schema":  "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                                          "contentVersion":  "1.0.0.0",
+                                          "parameters":  {
+                                                             "$authentication":  {
+                                                                                     "defaultValue":  {
+
+                                                                                                      },
+                                                                                     "type":  "SecureObject"
+                                                                                 },
+                                                             "$connections":  {
+                                                                                  "defaultValue":  {
+
+                                                                                                   },
+                                                                                  "type":  "Object"
+                                                                              }
+                                                         },
+                                          "triggers":  {
+                                                           "manual":  {
+                                                                          "type":  "Request",
+                                                                          "kind":  "Http",
+                                                                          "inputs":  {
+                                                                                         "triggerAuthenticationType":  "All",
+                                                                                         "schema":  {
+                                                                                                        "type":  "object",
+                                                                                                        "properties":  {
+                                                                                                                           "Idea Title":  {
+                                                                                                                                              "type":  "string"
+                                                                                                                                          },
+                                                                                                                           "Main Purpose":  {
+                                                                                                                                                "type":  "string"
+                                                                                                                                            },
+                                                                                                                           "Problem Description":  {
+                                                                                                                                                       "type":  "string"
+                                                                                                                                                   },
+                                                                                                                           "Current Handling":  {
+                                                                                                                                                    "type":  "string"
+                                                                                                                                                },
+                                                                                                                           "Current Impact":  {
+                                                                                                                                                  "type":  "string"
+                                                                                                                                              },
+                                                                                                                           "Occurrence":  {
+                                                                                                                                              "type":  "string"
+                                                                                                                                          },
+                                                                                                                           "Affected Scope":  {
+                                                                                                                                                  "type":  "string"
+                                                                                                                                              },
+                                                                                                                           "Idea Description":  {
+                                                                                                                                                    "type":  "string"
+                                                                                                                                                },
+                                                                                                                           "Suggested Technology":  {
+                                                                                                                                                        "type":  "string"
+                                                                                                                                                    },
+                                                                                                                           "Tried Before":  {
+                                                                                                                                                "type":  "string"
+                                                                                                                                            },
+                                                                                                                           "Previous Trial Outcome":  {
+                                                                                                                                                          "type":  "string"
+                                                                                                                                                      },
+                                                                                                                           "Expected Improvement":  {
+                                                                                                                                                        "type":  "string"
+                                                                                                                                                    },
+                                                                                                                           "Success Measures":  {
+                                                                                                                                                    "type":  "string"
+                                                                                                                                                },
+                                                                                                                           "Value Areas":  {
+                                                                                                                                               "type":  "array",
+                                                                                                                                               "items":  {
+                                                                                                                                                             "type":  "object",
+                                                                                                                                                             "properties":  {
+                                                                                                                                                                                "Value":  {
+                                                                                                                                                                                              "type":  "string"
+                                                                                                                                                                                          }
+                                                                                                                                                                            }
+                                                                                                                                                         }
+                                                                                                                                           },
+                                                                                                                           "Potential Impact":  {
+                                                                                                                                                    "type":  "string"
+                                                                                                                                                },
+                                                                                                                           "Business Units":  {
+                                                                                                                                                  "type":  "array",
+                                                                                                                                                  "items":  {
+                                                                                                                                                                "type":  "object",
+                                                                                                                                                                "properties":  {
+                                                                                                                                                                                   "Value":  {
+                                                                                                                                                                                                 "type":  "string"
+                                                                                                                                                                                             }
+                                                                                                                                                                               }
+                                                                                                                                                            }
+                                                                                                                                              },
+                                                                                                                           "Business Functions":  {
+                                                                                                                                                      "type":  "array",
+                                                                                                                                                      "items":  {
+                                                                                                                                                                    "type":  "object",
+                                                                                                                                                                    "properties":  {
+                                                                                                                                                                                       "Value":  {
+                                                                                                                                                                                                     "type":  "string"
+                                                                                                                                                                                                 }
+                                                                                                                                                                                   }
+                                                                                                                                                                }
+                                                                                                                                                  },
+                                                                                                                           "Will Help Testing":  {
+                                                                                                                                                     "type":  "string"
+                                                                                                                                                 },
+                                                                                                                           "Confirmation":  {
+                                                                                                                                                "type":  "string"
+                                                                                                                                            },
+                                                                                                                           "Submission Status":  {
+                                                                                                                                                     "type":  "string"
+                                                                                                                                                 },
+                                                                                                                           "Submitted By":  {
+                                                                                                                                                "type":  "string"
+                                                                                                                                            },
+                                                                                                                           "Submitted Email":  {
+                                                                                                                                                   "type":  "string"
+                                                                                                                                               },
+                                                                                                                           "Submission Ref":  {
+                                                                                                                                                  "type":  "string"
+                                                                                                                                              },
+                                                                                                                           "Submitted At":  {
+                                                                                                                                                "type":  "string"
+                                                                                                                                            },
+                                                                                                                           "AttachmentName":  {
+                                                                                                                                                  "type":  "string"
+                                                                                                                                              },
+                                                                                                                           "AttachmentBase64":  {
+                                                                                                                                                    "type":  "string"
+                                                                                                                                                }
+                                                                                                                       }
+                                                                                                    }
+                                                                                     }
+                                                                      }
+                                                       },
+                                          "actions":  {
+                                                          "Create_item":  {
+                                                                              "runAfter":  {
+
+                                                                                           },
+                                                                              "type":  "OpenApiConnection",
+                                                                              "inputs":  {
+                                                                                             "parameters":  {
+                                                                                                                "dataset":  "https://\u003ctenant\u003e.sharepoint.com/sites/\u003csite\u003e",
+                                                                                                                "table":  "0cc57281-1687-4d79-be8f-ba8aa4cbdfe9",
+                                                                                                                "item/Title":  "@triggerBody()?[\u0027Idea Title\u0027]",
+                                                                                                                "item/IdeaTitle":  "@triggerBody()?[\u0027Idea Title\u0027]",
+                                                                                                                "item/CurrentImpact":  "@triggerBody()?[\u0027Current Impact\u0027]",
+                                                                                                                "item/PreviousTrialOutcome":  "@triggerBody()?[\u0027Previous Trial Outcome\u0027]",
+                                                                                                                "item/SuccessMeasures":  "@triggerBody()?[\u0027Success Measures\u0027]",
+                                                                                                                "item/SubmittedBy":  "@triggerBody()?[\u0027Submitted By\u0027]",
+                                                                                                                "item/SubmittedEmail":  "@triggerBody()?[\u0027Submitted Email\u0027]",
+                                                                                                                "item/SubmissionRef":  "@triggerBody()?[\u0027Submission Ref\u0027]",
+                                                                                                                "item/SubmittedAt":  "@triggerBody()?[\u0027Submitted At\u0027]",
+                                                                                                                "item/ProblemDescription":  "@triggerBody()?[\u0027Problem Description\u0027]",
+                                                                                                                "item/CurrentHandling":  "@triggerBody()?[\u0027Current Handling\u0027]",
+                                                                                                                "item/IdeaDescription":  "@triggerBody()?[\u0027Idea Description\u0027]",
+                                                                                                                "item/SuggestedTechnology":  "@triggerBody()?[\u0027Suggested Technology\u0027]",
+                                                                                                                "item/ExpectedImprovement":  "@triggerBody()?[\u0027Expected Improvement\u0027]",
+                                                                                                                "item/Main_x0020_Purpose/Value":  "@triggerBody()?[\u0027Main Purpose\u0027]",
+                                                                                                                "item/Occurrence/Value":  "@triggerBody()?[\u0027Occurrence\u0027]",
+                                                                                                                "item/Affected_x0020_Scope/Value":  "@triggerBody()?[\u0027Affected Scope\u0027]",
+                                                                                                                "item/Tried_x0020_Before/Value":  "@triggerBody()?[\u0027Tried Before\u0027]",
+                                                                                                                "item/Potential_x0020_Impact/Value":  "@triggerBody()?[\u0027Potential Impact\u0027]",
+                                                                                                                "item/Will_x0020_Help_x0020_Testing/Value":  "@triggerBody()?[\u0027Will Help Testing\u0027]",
+                                                                                                                "item/Confirmation/Value":  "@triggerBody()?[\u0027Confirmation\u0027]",
+                                                                                                                "item/Value_x0020_Areas":  "@triggerBody()?[\u0027Value Areas\u0027]",
+                                                                                                                "item/Business_x0020_Units":  "@triggerBody()?[\u0027Business Units\u0027]",
+                                                                                                                "item/Business_x0020_Functions":  "@triggerBody()?[\u0027Business Functions\u0027]",
+                                                                                                                "item/Submission_x0020_Status/Value":  "@triggerBody()?[\u0027Submission Status\u0027]",
+                                                                                                                "item/Region/Value":  "@triggerBody()?[\u0027Region\u0027]\r\n"
+                                                                                                            },
+                                                                                             "host":  {
+                                                                                                          "apiId":  "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                                                                                          "operationId":  "PostItem",
+                                                                                                          "connectionName":  "shared_sharepointonline"
+                                                                                                      }
+                                                                                         }
+                                                                          },
+                                                          "Send_an_email_(V2)":  {
+                                                                                     "runAfter":  {
+                                                                                                      "For_each":  [
+                                                                                                                       "Succeeded"
+                                                                                                                   ]
+                                                                                                  },
+                                                                                     "type":  "OpenApiConnection",
+                                                                                     "inputs":  {
+                                                                                                    "parameters":  {
+                                                                                                                       "emailMessage/To":  "@outputs(\u0027Create_item\u0027)?[\u0027body/SubmittedEmail\u0027]",
+                                                                                                                       "emailMessage/Subject":  "We\u0027ve received your idea — @{outputs(\u0027Create_item\u0027)?[\u0027body/SubmissionRef\u0027]}",
+                                                                                                                       "emailMessage/Body":  "\u003cdiv style=\"font-family:Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#122023;max-width:620px;\"\u003e\n\u003cp\u003eDear \u003cstrong\u003e@{outputs(\u0027Create_item\u0027)?[\u0027body/SubmittedBy\u0027]}\u003c/strong\u003e,\u003c/p\u003e\n\u003cp\u003eThank you for submitting your innovation idea through the Innovo Labs portal.\u003c/p\u003e\n\u003cp\u003eWe’re pleased to confirm that we have received your submission successfully. Our team will now review your idea against the relevant campaign criteria and assess its potential.\u003c/p\u003e\n\u003cp\u003eIf your submission progresses to the next stage, a member of the Innovo Labs team will be in touch with you directly.\u003c/p\u003e\n\u003cp\u003eThank you for taking the time to share your idea with us. We appreciate your contribution and look forward to exploring innovative opportunities together.\u003c/p\u003e\n\u003cp style=\"margin-bottom:0;\"\u003eKind regards,\u003cbr\u003e\u003cstrong\u003eInnovo Labs Team\u003c/strong\u003e\u003c/p\u003e\n\u003chr style=\"border:none;border-top:1px solid #eae5da;margin:26px 0 14px;\"\u003e\n\u003cp style=\"font-size:13px;color:#6b6b68;margin:0;\"\u003e\nYour reference: \u003cstrong style=\"color:#3d6699;\"\u003e@{outputs(\u0027Create_item\u0027)?[\u0027body/SubmissionRef\u0027]}\u003c/strong\u003e\u003cbr\u003e\nIdea: @{triggerBody()?[\u0027Idea Title\u0027]}\n\u003c/p\u003e\n\u003c/div\u003e\n",
+                                                                                                                       "emailMessage/From":  "Innovo.labs@innovogroup.com",
+                                                                                                                       "emailMessage/Importance":  "Normal"
+                                                                                                                   },
+                                                                                                    "host":  {
+                                                                                                                 "apiId":  "/providers/Microsoft.PowerApps/apis/shared_office365",
+                                                                                                                 "operationId":  "SendEmailV2",
+                                                                                                                 "connectionName":  "shared_office365"
+                                                                                                             }
+                                                                                                }
+                                                                                 },
+                                                          "Select_value_areas":  {
+                                                                                     "runAfter":  {
+                                                                                                      "Create_item":  [
+                                                                                                                          "Succeeded"
+                                                                                                                      ]
+                                                                                                  },
+                                                                                     "type":  "Select",
+                                                                                     "inputs":  {
+                                                                                                    "from":  "@triggerBody()?[\u0027Value Areas\u0027]\r\n",
+                                                                                                    "select":  "@item()?[\u0027Value\u0027]\r\n"
+                                                                                                }
+                                                                                 },
+                                                          "Select_business_units":  {
+                                                                                        "runAfter":  {
+                                                                                                         "Select_value_areas":  [
+                                                                                                                                    "Succeeded"
+                                                                                                                                ]
+                                                                                                     },
+                                                                                        "type":  "Select",
+                                                                                        "inputs":  {
+                                                                                                       "from":  "@triggerBody()?[\u0027Business Units\u0027]",
+                                                                                                       "select":  "@item()?[\u0027Value\u0027]"
+                                                                                                   }
+                                                                                    },
+                                                          "Select_business_functions":  {
+                                                                                            "runAfter":  {
+                                                                                                             "Select_business_units":  [
+                                                                                                                                           "Succeeded"
+                                                                                                                                       ]
+                                                                                                         },
+                                                                                            "type":  "Select",
+                                                                                            "inputs":  {
+                                                                                                           "from":  "@triggerBody()?[\u0027Business Functions\u0027]",
+                                                                                                           "select":  "@item()?[\u0027Value\u0027]"
+                                                                                                       }
+                                                                                        },
+                                                          "List_rows":  {
+                                                                            "runAfter":  {
+                                                                                             "Select_business_functions":  [
+                                                                                                                               "Succeeded"
+                                                                                                                           ]
+                                                                                         },
+                                                                            "type":  "OpenApiConnection",
+                                                                            "inputs":  {
+                                                                                           "parameters":  {
+                                                                                                              "entityName":  "contacts",
+                                                                                                              "$filter":  "emailaddress1 eq \u0027@{outputs(\u0027Create_item\u0027)?[\u0027body/SubmittedEmail\u0027]}\u0027",
+                                                                                                              "$top":  1
+                                                                                                          },
+                                                                                           "host":  {
+                                                                                                        "apiId":  "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                                                                        "operationId":  "ListRecords",
+                                                                                                        "connectionName":  "shared_commondataserviceforapps"
+                                                                                                    }
+                                                                                       }
+                                                                        },
+                                                          "For_each":  {
+                                                                           "foreach":  "@outputs(\u0027List_rows\u0027)?[\u0027body/value\u0027]",
+                                                                           "actions":  {
+                                                                                           "Add_a_new_row":  {
+                                                                                                                 "type":  "OpenApiConnection",
+                                                                                                                 "inputs":  {
+                                                                                                                                "parameters":  {
+                                                                                                                                                   "entityName":  "innovo_ideas",
+                                                                                                                                                   "item/innovo_affectedscope":  "@triggerBody()?[\u0027Affected Scope\u0027]",
+                                                                                                                                                   "item/innovo_businessfunctions":  "@join(body(\u0027Select_business_functions\u0027), \u0027; \u0027)",
+                                                                                                                                                   "item/innovo_businessunits":  "@join(body(\u0027Select_business_units\u0027), \u0027; \u0027)",
+                                                                                                                                                   "item/innovo_confirmation":  "@triggerBody()?[\u0027Confirmation\u0027]",
+                                                                                                                                                   "item/innovo_Contact@odata.bind":  "@concat(\u0027/contacts(\u0027, first(outputs(\u0027List_rows\u0027)?[\u0027body/value\u0027])?[\u0027contactid\u0027], \u0027)\u0027)",
+                                                                                                                                                   "item/innovo_currenthandling":  "@triggerBody()?[\u0027Current Handling\u0027]",
+                                                                                                                                                   "item/innovo_currentimpact":  "@triggerBody()?[\u0027Current Impact\u0027]",
+                                                                                                                                                   "item/innovo_expectedimprovement":  "@triggerBody()?[\u0027Expected Improvement\u0027]",
+                                                                                                                                                   "item/innovo_ideadescription":  "@triggerBody()?[\u0027Idea Description\u0027]",
+                                                                                                                                                   "item/innovo_mainpurpose":  "@triggerBody()?[\u0027Main Purpose\u0027]",
+                                                                                                                                                   "item/innovo_ideatitle":  "@triggerBody()?[\u0027Idea Title\u0027]",
+                                                                                                                                                   "item/innovo_occurrence":  "@triggerBody()?[\u0027Occurrence\u0027]",
+                                                                                                                                                   "item/innovo_potentialimpact":  "@triggerBody()?[\u0027Potential Impact\u0027]",
+                                                                                                                                                   "item/innovo_previoustrialoutcome":  "@triggerBody()?[\u0027Previous Trial Outcome\u0027]",
+                                                                                                                                                   "item/innovo_problemdescription":  "@triggerBody()?[\u0027Problem Description\u0027]",
+                                                                                                                                                   "item/innovo_region":  "@triggerBody()?[\u0027Region\u0027]\r\n",
+                                                                                                                                                   "item/innovo_ideastatus":  "@triggerBody()?[\u0027Submission Status\u0027]",
+                                                                                                                                                   "item/innovo_submissionreference":  "@triggerBody()?[\u0027Submission Ref\u0027]",
+                                                                                                                                                   "item/innovo_submittedby":  "@triggerBody()?[\u0027Submitted By\u0027]",
+                                                                                                                                                   "item/innovo_submitteremail":  "@triggerBody()?[\u0027Submitted Email\u0027]",
+                                                                                                                                                   "item/innovo_submissiondate":  "@triggerBody()?[\u0027Submitted At\u0027]",
+                                                                                                                                                   "item/innovo_successmetrics":  "@triggerBody()?[\u0027Success Measures\u0027]",
+                                                                                                                                                   "item/innovo_suggestedtechnology":  "@triggerBody()?[\u0027Suggested Technology\u0027]",
+                                                                                                                                                   "item/innovo_previousattempts":  "@triggerBody()?[\u0027Tried Before\u0027]",
+                                                                                                                                                   "item/innovo_valueareas":  "@join(body(\u0027Select_value_areas\u0027), \u0027; \u0027)",
+                                                                                                                                                   "item/innovo_testingassistance":  "@triggerBody()?[\u0027Will Help Testing\u0027]"
+                                                                                                                                               },
+                                                                                                                                "host":  {
+                                                                                                                                             "apiId":  "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                                                                                                             "operationId":  "CreateRecord",
+                                                                                                                                             "connectionName":  "shared_commondataserviceforapps"
+                                                                                                                                         }
+                                                                                                                            }
+                                                                                                             }
+                                                                                       },
+                                                                           "runAfter":  {
+                                                                                            "List_rows":  [
+                                                                                                              "Succeeded"
+                                                                                                          ]
+                                                                                        },
+                                                                           "type":  "Foreach"
+                                                                       },
+                                                          "Create_item_1":  {
+                                                                                "runAfter":  {
+                                                                                                 "Send_an_email_(V2)":  [
+                                                                                                                            "Succeeded"
+                                                                                                                        ]
+                                                                                             },
+                                                                                "type":  "OpenApiConnection",
+                                                                                "inputs":  {
+                                                                                               "parameters":  {
+                                                                                                                  "dataset":  "https://\u003ctenant\u003e.sharepoint.com/sites/\u003csite\u003e",
+                                                                                                                  "table":  "5c275fd1-8a92-414d-8be7-245a9d465adf",
+                                                                                                                  "item/Title":  "Idea submitted",
+                                                                                                                  "item/Idea_x0020_Ref":  "@triggerBody()?[\u0027Submission Ref\u0027]",
+                                                                                                                  "item/Event_x0020_Type/Value":  "Idea submitted",
+                                                                                                                  "item/Event_x0020_On":  "@outputs(\u0027Create_item\u0027)?[\u0027body/SubmittedAt\u0027]",
+                                                                                                                  "item/Author0":  "Innovo Labs"
+                                                                                                              },
+                                                                                               "host":  {
+                                                                                                            "apiId":  "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                                                                                            "operationId":  "PostItem",
+                                                                                                            "connectionName":  "shared_sharepointonline"
+                                                                                                        }
+                                                                                           }
+                                                                            }
+                                                      },
+                                          "outputs":  {
+
+                                                      }
+                                      },
+                       "templateName":  null
+                   },
+    "schemaVersion":  "1.0.0.0"
+}

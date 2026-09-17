@@ -1,0 +1,114 @@
+{
+    "properties":  {
+                       "connectionReferences":  {
+                                                    "shared_commondataserviceforapps":  {
+                                                                                            "runtimeSource":  "embedded",
+                                                                                            "connection":  {
+                                                                                                               "connectionReferenceLogicalName":  "new_sharedcommondataserviceforapps_cfbb3"
+                                                                                                           },
+                                                                                            "api":  {
+                                                                                                        "name":  "shared_commondataserviceforapps"
+                                                                                                    }
+                                                                                        }
+                                                },
+                       "definition":  {
+                                          "$schema":  "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                                          "contentVersion":  "1.0.0.0",
+                                          "parameters":  {
+                                                             "$authentication":  {
+                                                                                     "defaultValue":  {
+
+                                                                                                      },
+                                                                                     "type":  "SecureObject"
+                                                                                 },
+                                                             "$connections":  {
+                                                                                  "defaultValue":  {
+
+                                                                                                   },
+                                                                                  "type":  "Object"
+                                                                              }
+                                                         },
+                                          "triggers":  {
+                                                           "When_a_row_is_added,_modified_or_deleted":  {
+                                                                                                            "type":  "OpenApiConnectionWebhook",
+                                                                                                            "inputs":  {
+                                                                                                                           "parameters":  {
+                                                                                                                                              "subscriptionRequest/message":  7,
+                                                                                                                                              "subscriptionRequest/entityname":  "innovo_idea",
+                                                                                                                                              "subscriptionRequest/scope":  4
+                                                                                                                                          },
+                                                                                                                           "host":  {
+                                                                                                                                        "apiId":  "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                                                                                                        "operationId":  "SubscribeWebhookTrigger",
+                                                                                                                                        "connectionName":  "shared_commondataserviceforapps"
+                                                                                                                                    }
+                                                                                                                       }
+                                                                                                        }
+                                                       },
+                                          "actions":  {
+                                                          "Count_ideas":  {
+                                                                              "runAfter":  {
+
+                                                                                           },
+                                                                              "type":  "OpenApiConnection",
+                                                                              "inputs":  {
+                                                                                             "parameters":  {
+                                                                                                                "entityName":  "innovo_ideas",
+                                                                                                                "fetchXml":  "\u003cfetch aggregate=\"true\"\u003e\n  \u003centity name=\"innovo_idea\"\u003e\n    \u003cattribute name=\"innovo_ideaid\" alias=\"ideacount\" aggregate=\"countcolumn\" /\u003e\n    \u003cfilter type=\"and\"\u003e\n      \u003ccondition attribute=\"statecode\" operator=\"eq\" value=\"0\" /\u003e\n    \u003c/filter\u003e\n  \u003c/entity\u003e\n\u003c/fetch\u003e\n"
+                                                                                                            },
+                                                                                             "host":  {
+                                                                                                          "apiId":  "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                                                                          "operationId":  "ListRecords",
+                                                                                                          "connectionName":  "shared_commondataserviceforapps"
+                                                                                                      }
+                                                                                         }
+                                                                          },
+                                                          "Latest_snapshot":  {
+                                                                                  "runAfter":  {
+                                                                                                   "Count_ideas":  [
+                                                                                                                       "Succeeded"
+                                                                                                                   ]
+                                                                                               },
+                                                                                  "type":  "OpenApiConnection",
+                                                                                  "inputs":  {
+                                                                                                 "parameters":  {
+                                                                                                                    "entityName":  "innovo_trackersnapshots",
+                                                                                                                    "$orderby":  "innovo_asofdate desc",
+                                                                                                                    "$top":  1
+                                                                                                                },
+                                                                                                 "host":  {
+                                                                                                              "apiId":  "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                                                                              "operationId":  "ListRecords",
+                                                                                                              "connectionName":  "shared_commondataserviceforapps"
+                                                                                                          }
+                                                                                             }
+                                                                              },
+                                                          "Update_a_row":  {
+                                                                               "runAfter":  {
+                                                                                                "Latest_snapshot":  [
+                                                                                                                        "Succeeded"
+                                                                                                                    ]
+                                                                                            },
+                                                                               "type":  "OpenApiConnection",
+                                                                               "inputs":  {
+                                                                                              "parameters":  {
+                                                                                                                 "entityName":  "innovo_trackersnapshots",
+                                                                                                                 "recordId":  "@first(outputs(\u0027Latest_snapshot\u0027)?[\u0027body/value\u0027])?[\u0027innovo_trackersnapshotid\u0027]\r\n",
+                                                                                                                 "item/innovo_ideassubmitted":  "@first(outputs(\u0027Count_ideas\u0027)?[\u0027body/value\u0027])?[\u0027ideacount\u0027]\r\n"
+                                                                                                             },
+                                                                                              "host":  {
+                                                                                                           "apiId":  "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                                                                           "operationId":  "UpdateOnlyRecord",
+                                                                                                           "connectionName":  "shared_commondataserviceforapps"
+                                                                                                       }
+                                                                                          }
+                                                                           }
+                                                      },
+                                          "outputs":  {
+
+                                                      }
+                                      },
+                       "templateName":  null
+                   },
+    "schemaVersion":  "1.0.0.0"
+}

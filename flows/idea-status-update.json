@@ -1,0 +1,337 @@
+{
+    "properties":  {
+                       "connectionReferences":  {
+                                                    "shared_sharepointonline":  {
+                                                                                    "runtimeSource":  "embedded",
+                                                                                    "connection":  {
+                                                                                                       "connectionReferenceLogicalName":  "new_sharedsharepointonline_8f10c"
+                                                                                                   },
+                                                                                    "api":  {
+                                                                                                "name":  "shared_sharepointonline"
+                                                                                            }
+                                                                                },
+                                                    "shared_commondataserviceforapps":  {
+                                                                                            "runtimeSource":  "embedded",
+                                                                                            "connection":  {
+                                                                                                               "connectionReferenceLogicalName":  "new_sharedcommondataserviceforapps_cfbb3"
+                                                                                                           },
+                                                                                            "api":  {
+                                                                                                        "name":  "shared_commondataserviceforapps"
+                                                                                                    }
+                                                                                        },
+                                                    "shared_office365-1":  {
+                                                                               "runtimeSource":  "embedded",
+                                                                               "connection":  {
+                                                                                                  "connectionReferenceLogicalName":  "new_sharedoffice365_1b0e6"
+                                                                                              },
+                                                                               "api":  {
+                                                                                           "name":  "shared_office365"
+                                                                                       }
+                                                                           }
+                                                },
+                       "definition":  {
+                                          "$schema":  "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                                          "contentVersion":  "1.0.0.0",
+                                          "parameters":  {
+                                                             "$authentication":  {
+                                                                                     "defaultValue":  {
+
+                                                                                                      },
+                                                                                     "type":  "SecureObject"
+                                                                                 },
+                                                             "$connections":  {
+                                                                                  "defaultValue":  {
+
+                                                                                                   },
+                                                                                  "type":  "Object"
+                                                                              }
+                                                         },
+                                          "triggers":  {
+                                                           "When_an_item_is_created_or_modified":  {
+                                                                                                       "recurrence":  {
+                                                                                                                          "interval":  1,
+                                                                                                                          "frequency":  "Minute"
+                                                                                                                      },
+                                                                                                       "splitOn":  "@triggerOutputs()?[\u0027body/value\u0027]",
+                                                                                                       "type":  "OpenApiConnection",
+                                                                                                       "inputs":  {
+                                                                                                                      "parameters":  {
+                                                                                                                                         "dataset":  "https://\u003ctenant\u003e.sharepoint.com/sites/\u003csite\u003e",
+                                                                                                                                         "table":  "0cc57281-1687-4d79-be8f-ba8aa4cbdfe9"
+                                                                                                                                     },
+                                                                                                                      "host":  {
+                                                                                                                                   "apiId":  "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                                                                                                                   "operationId":  "GetOnUpdatedItems",
+                                                                                                                                   "connectionName":  "shared_sharepointonline"
+                                                                                                                               }
+                                                                                                                  }
+                                                                                                   }
+                                                       },
+                                          "actions":  {
+                                                          "Initialize_variable":  {
+                                                                                      "runAfter":  {
+
+                                                                                                   },
+                                                                                      "type":  "InitializeVariable",
+                                                                                      "inputs":  {
+                                                                                                     "variables":  [
+                                                                                                                       {
+                                                                                                                           "name":  "statusMessage",
+                                                                                                                           "type":  "string"
+                                                                                                                       }
+                                                                                                                   ]
+                                                                                                 }
+                                                                                  },
+                                                          "Condition":  {
+                                                                            "actions":  {
+                                                                                            "List_rows":  {
+                                                                                                              "type":  "OpenApiConnection",
+                                                                                                              "inputs":  {
+                                                                                                                             "parameters":  {
+                                                                                                                                                "entityName":  "innovo_ideas",
+                                                                                                                                                "$filter":  "innovo_submissionreference eq \u0027@{triggerBody()?[\u0027SubmissionRef\u0027]}\u0027",
+                                                                                                                                                "$top":  1
+                                                                                                                                            },
+                                                                                                                             "host":  {
+                                                                                                                                          "apiId":  "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                                                                                                          "operationId":  "ListRecords",
+                                                                                                                                          "connectionName":  "shared_commondataserviceforapps"
+                                                                                                                                      }
+                                                                                                                         }
+                                                                                                          },
+                                                                                            "Update_a_row":  {
+                                                                                                                 "runAfter":  {
+                                                                                                                                  "List_rows":  [
+                                                                                                                                                    "Succeeded"
+                                                                                                                                                ]
+                                                                                                                              },
+                                                                                                                 "type":  "OpenApiConnection",
+                                                                                                                 "inputs":  {
+                                                                                                                                "parameters":  {
+                                                                                                                                                   "entityName":  "innovo_ideas",
+                                                                                                                                                   "recordId":  "@first(outputs(\u0027List_rows\u0027)?[\u0027body/value\u0027])?[\u0027innovo_ideaid\u0027]\r\n",
+                                                                                                                                                   "item/innovo_ideastatus":  "@triggerBody()?[\u0027Submission_x0020_Status/Value\u0027]"
+                                                                                                                                               },
+                                                                                                                                "host":  {
+                                                                                                                                             "apiId":  "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                                                                                                             "operationId":  "UpdateOnlyRecord",
+                                                                                                                                             "connectionName":  "shared_commondataserviceforapps"
+                                                                                                                                         }
+                                                                                                                            }
+                                                                                                             },
+                                                                                            "Switch":  {
+                                                                                                           "runAfter":  {
+                                                                                                                            "Update_a_row":  [
+                                                                                                                                                 "Succeeded"
+                                                                                                                                             ]
+                                                                                                                        },
+                                                                                                           "cases":  {
+                                                                                                                         "Case":  {
+                                                                                                                                      "case":  "Under review",
+                                                                                                                                      "actions":  {
+                                                                                                                                                      "Set_variable":  {
+                                                                                                                                                                           "type":  "SetVariable",
+                                                                                                                                                                           "inputs":  {
+                                                                                                                                                                                          "name":  "statusMessage",
+                                                                                                                                                                                          "value":  "Your idea is being scored against our criteria by the digital team. We\u0027ll be in touch when there\u0027s a decision."
+                                                                                                                                                                                      }
+                                                                                                                                                                       }
+                                                                                                                                                  }
+                                                                                                                                  },
+                                                                                                                         "Case 2":  {
+                                                                                                                                        "case":  "Shortlisted",
+                                                                                                                                        "actions":  {
+                                                                                                                                                        "Set_variable_1":  {
+                                                                                                                                                                               "type":  "SetVariable",
+                                                                                                                                                                               "inputs":  {
+                                                                                                                                                                                              "name":  "statusMessage",
+                                                                                                                                                                                              "value":  "Your idea passed review and has been shortlisted. We\u0027re now lining up where to trial it."
+                                                                                                                                                                                          }
+                                                                                                                                                                           }
+                                                                                                                                                    }
+                                                                                                                                    },
+                                                                                                                         "Case 3":  {
+                                                                                                                                        "case":  "In trial",
+                                                                                                                                        "actions":  {
+                                                                                                                                                        "Set_variable_2":  {
+                                                                                                                                                                               "type":  "SetVariable",
+                                                                                                                                                                               "inputs":  {
+                                                                                                                                                                                              "name":  "statusMessage",
+                                                                                                                                                                                              "value":  "Your idea is being tested on a real project before we decide whether to roll it out more widely."
+                                                                                                                                                                                          }
+                                                                                                                                                                           }
+                                                                                                                                                    }
+                                                                                                                                    },
+                                                                                                                         "Case 4":  {
+                                                                                                                                        "case":  "Impact review",
+                                                                                                                                        "actions":  {
+                                                                                                                                                        "Set_variable_3":  {
+                                                                                                                                                                               "type":  "SetVariable",
+                                                                                                                                                                               "inputs":  {
+                                                                                                                                                                                              "name":  "statusMessage",
+                                                                                                                                                                                              "value":  "Your idea is in use, and we\u0027re measuring what it actually returned before calling it done."
+                                                                                                                                                                                          }
+                                                                                                                                                                           }
+                                                                                                                                                    }
+                                                                                                                                    },
+                                                                                                                         "Case 5":  {
+                                                                                                                                        "case":  "Implemented",
+                                                                                                                                        "actions":  {
+                                                                                                                                                        "Set_variable_4":  {
+                                                                                                                                                                               "type":  "SetVariable",
+                                                                                                                                                                               "inputs":  {
+                                                                                                                                                                                              "name":  "statusMessage",
+                                                                                                                                                                                              "value":  "Your idea has been implemented and is live across Innovo. Thank you — this one made it all the way."
+                                                                                                                                                                                          }
+                                                                                                                                                                           }
+                                                                                                                                                    }
+                                                                                                                                    },
+                                                                                                                         "Case 6":  {
+                                                                                                                                        "case":  "Parked",
+                                                                                                                                        "actions":  {
+                                                                                                                                                        "Set_variable_5":  {
+                                                                                                                                                                               "type":  "SetVariable",
+                                                                                                                                                                               "inputs":  {
+                                                                                                                                                                                              "name":  "statusMessage",
+                                                                                                                                                                                              "value":  "Your idea is paused for now. It stays in the campaign and can pick up again later."
+                                                                                                                                                                                          }
+                                                                                                                                                                           }
+                                                                                                                                                    }
+                                                                                                                                    },
+                                                                                                                         "Case 7":  {
+                                                                                                                                        "case":  "Cancelled",
+                                                                                                                                        "actions":  {
+                                                                                                                                                        "Set_variable_6":  {
+                                                                                                                                                                               "type":  "SetVariable",
+                                                                                                                                                                               "inputs":  {
+                                                                                                                                                                                              "name":  "statusMessage",
+                                                                                                                                                                                              "value":  "Your idea has been withdrawn from the campaign. It stays on record."
+                                                                                                                                                                                          }
+                                                                                                                                                                           }
+                                                                                                                                                    }
+                                                                                                                                    }
+                                                                                                                     },
+                                                                                                           "default":  {
+                                                                                                                           "actions":  {
+                                                                                                                                           "Set_variable_7":  {
+                                                                                                                                                                  "type":  "SetVariable",
+                                                                                                                                                                  "inputs":  {
+                                                                                                                                                                                 "name":  "statusMessage",
+                                                                                                                                                                                 "value":  "Your idea\u0027s status has been updated. You can see where it\u0027s got to on the Innovo Labs portal."
+                                                                                                                                                                             }
+                                                                                                                                                              }
+                                                                                                                                       }
+                                                                                                                       },
+                                                                                                           "expression":  "@triggerBody()?[\u0027Submission_x0020_Status/Value\u0027]",
+                                                                                                           "type":  "Switch"
+                                                                                                       },
+                                                                                            "Send_an_email_(V2)":  {
+                                                                                                                       "runAfter":  {
+                                                                                                                                        "Switch":  [
+                                                                                                                                                       "Succeeded"
+                                                                                                                                                   ]
+                                                                                                                                    },
+                                                                                                                       "type":  "OpenApiConnection",
+                                                                                                                       "inputs":  {
+                                                                                                                                      "parameters":  {
+                                                                                                                                                         "emailMessage/To":  "@triggerBody()?[\u0027SubmittedEmail\u0027]",
+                                                                                                                                                         "emailMessage/Subject":  "Your idea — @{triggerBody()?[\u0027Submission_x0020_Status/Value\u0027]}",
+                                                                                                                                                         "emailMessage/Body":  "\u003cdiv style=\"font-family:Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#122023;max-width:620px;\"\u003e\n\u003cp\u003eDear \u003cstrong\u003e@{triggerBody()?[\u0027SubmittedBy\u0027]}\u003c/strong\u003e,\u003c/p\u003e\n\u003cp\u003e@{variables(\u0027statusMessage\u0027)}\u003c/p\u003e\n\u003cp style=\"margin-bottom:0;\"\u003eKind regards,\u003cbr\u003e\u003cstrong\u003eInnovo Labs Team\u003c/strong\u003e\u003c/p\u003e\n\u003chr style=\"border:none;border-top:1px solid #eae5da;margin:26px 0 14px;\"\u003e\n\u003cp style=\"font-size:13px;color:#6b6b68;margin:0;\"\u003e\nYour reference: \u003cstrong style=\"color:#3d6699;\"\u003e@{triggerBody()?[\u0027SubmissionRef\u0027]}\u003c/strong\u003e\u003cbr\u003e\nIdea: @{triggerBody()?[\u0027IdeaTitle\u0027]}\n\u003c/p\u003e\n\u003c/div\u003e\n",
+                                                                                                                                                         "emailMessage/From":  "Innovo.labs@innovogroup.com",
+                                                                                                                                                         "emailMessage/Importance":  "Normal"
+                                                                                                                                                     },
+                                                                                                                                      "host":  {
+                                                                                                                                                   "apiId":  "/providers/Microsoft.PowerApps/apis/shared_office365",
+                                                                                                                                                   "operationId":  "SendEmailV2",
+                                                                                                                                                   "connectionName":  "shared_office365-1"
+                                                                                                                                               }
+                                                                                                                                  }
+                                                                                                                   },
+                                                                                            "Update_item":  {
+                                                                                                                "runAfter":  {
+                                                                                                                                 "Create_item":  [
+                                                                                                                                                     "Succeeded"
+                                                                                                                                                 ]
+                                                                                                                             },
+                                                                                                                "type":  "OpenApiConnection",
+                                                                                                                "inputs":  {
+                                                                                                                               "parameters":  {
+                                                                                                                                                  "dataset":  "https://\u003ctenant\u003e.sharepoint.com/sites/\u003csite\u003e",
+                                                                                                                                                  "table":  "0cc57281-1687-4d79-be8f-ba8aa4cbdfe9",
+                                                                                                                                                  "id":  "@triggerBody()?[\u0027ID\u0027]",
+                                                                                                                                                  "item/Title":  "@triggerBody()?[\u0027Title\u0027]",
+                                                                                                                                                  "item/Status_x0020_Notified":  "@triggerBody()?[\u0027Submission_x0020_Status/Value\u0027]"
+                                                                                                                                              },
+                                                                                                                               "host":  {
+                                                                                                                                            "apiId":  "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                                                                                                                            "operationId":  "PatchItem",
+                                                                                                                                            "connectionName":  "shared_sharepointonline"
+                                                                                                                                        }
+                                                                                                                           }
+                                                                                                            },
+                                                                                            "Create_item":  {
+                                                                                                                "runAfter":  {
+                                                                                                                                 "Send_an_email_(V2)":  [
+                                                                                                                                                            "Succeeded"
+                                                                                                                                                        ]
+                                                                                                                             },
+                                                                                                                "type":  "OpenApiConnection",
+                                                                                                                "inputs":  {
+                                                                                                                               "parameters":  {
+                                                                                                                                                  "dataset":  "https://\u003ctenant\u003e.sharepoint.com/sites/\u003csite\u003e",
+                                                                                                                                                  "table":  "5c275fd1-8a92-414d-8be7-245a9d465adf",
+                                                                                                                                                  "item/Title":  "Moved to @{triggerBody()?[\u0027Submission_x0020_Status/Value\u0027]}",
+                                                                                                                                                  "item/Idea_x0020_Ref":  "@triggerBody()?[\u0027SubmissionRef\u0027]",
+                                                                                                                                                  "item/Event_x0020_Type/Value":  "Status changed",
+                                                                                                                                                  "item/Event_x0020_On":  "@utcNow()",
+                                                                                                                                                  "item/Author0":  "Innovo Labs"
+                                                                                                                                              },
+                                                                                                                               "host":  {
+                                                                                                                                            "apiId":  "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                                                                                                                            "operationId":  "PostItem",
+                                                                                                                                            "connectionName":  "shared_sharepointonline"
+                                                                                                                                        }
+                                                                                                                           }
+                                                                                                            }
+                                                                                        },
+                                                                            "runAfter":  {
+                                                                                             "Initialize_variable":  [
+                                                                                                                         "Succeeded"
+                                                                                                                     ]
+                                                                                         },
+                                                                            "else":  {
+                                                                                         "actions":  {
+
+                                                                                                     }
+                                                                                     },
+                                                                            "expression":  {
+                                                                                               "and":  [
+                                                                                                           {
+                                                                                                               "not":  {
+                                                                                                                           "equals":  [
+                                                                                                                                          "@triggerBody()?[\u0027Submission_x0020_Status/Value\u0027]",
+                                                                                                                                          "@triggerBody()?[\u0027Status_x0020_Notified\u0027]"
+                                                                                                                                      ]
+                                                                                                                       }
+                                                                                                           },
+                                                                                                           {
+                                                                                                               "not":  {
+                                                                                                                           "equals":  [
+                                                                                                                                          "@triggerBody()?[\u0027Submission_x0020_Status/Value\u0027]",
+                                                                                                                                          "Submitted"
+                                                                                                                                      ]
+                                                                                                                       }
+                                                                                                           }
+                                                                                                       ]
+                                                                                           },
+                                                                            "type":  "If"
+                                                                        }
+                                                      },
+                                          "outputs":  {
+
+                                                      }
+                                      },
+                       "templateName":  null
+                   },
+    "schemaVersion":  "1.0.0.0"
+}

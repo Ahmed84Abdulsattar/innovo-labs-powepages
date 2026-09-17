@@ -1,0 +1,112 @@
+{
+    "properties":  {
+                       "connectionReferences":  {
+                                                    "shared_sharepointonline":  {
+                                                                                    "runtimeSource":  "embedded",
+                                                                                    "connection":  {
+                                                                                                       "connectionReferenceLogicalName":  "new_sharedsharepointonline_8f10c"
+                                                                                                   },
+                                                                                    "api":  {
+                                                                                                "name":  "shared_sharepointonline"
+                                                                                            }
+                                                                                },
+                                                    "shared_commondataserviceforapps":  {
+                                                                                            "runtimeSource":  "embedded",
+                                                                                            "connection":  {
+                                                                                                               "connectionReferenceLogicalName":  "new_sharedcommondataserviceforapps_cfbb3"
+                                                                                                           },
+                                                                                            "api":  {
+                                                                                                        "name":  "shared_commondataserviceforapps"
+                                                                                                    }
+                                                                                        }
+                                                },
+                       "definition":  {
+                                          "$schema":  "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                                          "contentVersion":  "1.0.0.0",
+                                          "parameters":  {
+                                                             "$authentication":  {
+                                                                                     "defaultValue":  {
+
+                                                                                                      },
+                                                                                     "type":  "SecureObject"
+                                                                                 },
+                                                             "$connections":  {
+                                                                                  "defaultValue":  {
+
+                                                                                                   },
+                                                                                  "type":  "Object"
+                                                                              }
+                                                         },
+                                          "triggers":  {
+                                                           "When_an_item_is_created":  {
+                                                                                           "recurrence":  {
+                                                                                                              "interval":  1,
+                                                                                                              "frequency":  "Minute"
+                                                                                                          },
+                                                                                           "splitOn":  "@triggerOutputs()?[\u0027body/value\u0027]",
+                                                                                           "type":  "OpenApiConnection",
+                                                                                           "inputs":  {
+                                                                                                          "parameters":  {
+                                                                                                                             "dataset":  "https://\u003ctenant\u003e.sharepoint.com/sites/\u003csite\u003e",
+                                                                                                                             "table":  "5c275fd1-8a92-414d-8be7-245a9d465adf"
+                                                                                                                         },
+                                                                                                          "host":  {
+                                                                                                                       "apiId":  "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                                                                                                                       "operationId":  "GetOnNewItems",
+                                                                                                                       "connectionName":  "shared_sharepointonline"
+                                                                                                                   }
+                                                                                                      }
+                                                                                       }
+                                                       },
+                                          "actions":  {
+                                                          "List_rows":  {
+                                                                            "runAfter":  {
+
+                                                                                         },
+                                                                            "type":  "OpenApiConnection",
+                                                                            "inputs":  {
+                                                                                           "parameters":  {
+                                                                                                              "entityName":  "innovo_ideas",
+                                                                                                              "$filter":  "innovo_submissionreference eq \u0027@{triggerBody()?[\u0027Idea_x0020_Ref\u0027]}\u0027\n",
+                                                                                                              "$top":  1
+                                                                                                          },
+                                                                                           "host":  {
+                                                                                                        "apiId":  "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                                                                        "operationId":  "ListRecords",
+                                                                                                        "connectionName":  "shared_commondataserviceforapps"
+                                                                                                    }
+                                                                                       }
+                                                                        },
+                                                          "Add_a_new_row":  {
+                                                                                "runAfter":  {
+                                                                                                 "List_rows":  [
+                                                                                                                   "Succeeded"
+                                                                                                               ]
+                                                                                             },
+                                                                                "type":  "OpenApiConnection",
+                                                                                "inputs":  {
+                                                                                               "parameters":  {
+                                                                                                                  "entityName":  "innovo_ideaactivities",
+                                                                                                                  "item/innovo_authorname":  "@triggerBody()?[\u0027Author0\u0027]",
+                                                                                                                  "item/innovo_eventdatetime":  "@triggerBody()?[\u0027Event_x0020_On\u0027]",
+                                                                                                                  "item/innovo_eventtype":  "@triggerBody()?[\u0027Event_x0020_Type/Value\u0027]",
+                                                                                                                  "item/innovo_Idea@odata.bind":  "@concat(\u0027/innovo_ideas(\u0027, first(outputs(\u0027List_rows\u0027)?[\u0027body/value\u0027])?[\u0027innovo_ideaid\u0027], \u0027)\u0027)\r\n",
+                                                                                                                  "item/innovo_eventname":  "@triggerBody()?[\u0027Title\u0027]",
+                                                                                                                  "item/innovo_eventnote":  "@triggerBody()?[\u0027Note\u0027]"
+                                                                                                              },
+                                                                                               "host":  {
+                                                                                                            "apiId":  "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                                                                            "operationId":  "CreateRecord",
+                                                                                                            "connectionName":  "shared_commondataserviceforapps"
+                                                                                                        }
+                                                                                           }
+                                                                            }
+                                                      },
+                                          "outputs":  {
+
+                                                      }
+                                      },
+                       "templateName":  null
+                   },
+    "schemaVersion":  "1.0.0.0"
+}
