@@ -1,0 +1,14 @@
+adx_append: false
+adx_appendto: false
+adx_create: false
+adx_delete: false
+adx_entitylogicalname: innovo_trackersnapshot
+adx_entityname: Tracker snapshot – read
+adx_entitypermission_webrole:
+- 7905e863-0b00-4597-82bd-ed31903bffa9
+- ee537163-2caa-457c-af7b-2b131601134b
+adx_entitypermissionid: d4e16b64-1f7e-461b-a98d-01dd4a6d89b8
+adx_parententitypermission: 
+adx_read: true
+adx_scope: 756150000
+adx_write: false

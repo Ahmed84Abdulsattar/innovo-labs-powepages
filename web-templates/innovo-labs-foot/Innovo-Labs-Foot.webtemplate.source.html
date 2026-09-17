@@ -1,0 +1,57 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — Footer and document close
+  Power Pages Web Template · Name: "Innovo Labs Foot"
+
+  Closes <main>, renders the footer, closes the document. Pair with
+  "Innovo Labs Head".
+=============================================================================
+{% endcomment %}
+
+  </main>
+
+  {% comment %} ================= FOOTER ================= {% endcomment %}
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer__grid">
+
+        <div>
+          <img src="/innovo-labs-logo.webp" alt="Innovo Labs"
+               width="200" height="22" style="margin-bottom:var(--s-md)">
+          <p style="color:var(--text-muted);font-size:var(--fs-sm);max-width:34ch;font-weight:300">
+            A dedicated programme to embed innovation across Innovo globally —
+            evolving our business and exceeding our clients' expectations.
+          </p>
+        </div>
+
+        <div>
+          <p class="footer__title">Explore</p>
+          <ul class="footer__list">
+            <li><a href="/news">Inside Innovo Labs</a></li>
+            <li><a href="/tracker">Innovation Tracker</a></li>
+            <li><a href="/champions">Labs Champions</a></li>
+            <li><a href="/partnerships">Partnerships</a></li>
+            <li><a href="/challenges">Explore Challenges</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="footer__title">About</p>
+          <ul class="footer__list">
+            <li><a href="/#what-we-do">What we do</a></li>
+            <li><a href="/#innovators">Innovators of Tomorrow</a></li>
+            <li><a href="/#leadership">Leadership</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer__bottom">
+        <span>&copy; {{ 'now' | date: 'yyyy' }} Innovo Group. Internal use only.</span>
+        <span>A better built tomorrow</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

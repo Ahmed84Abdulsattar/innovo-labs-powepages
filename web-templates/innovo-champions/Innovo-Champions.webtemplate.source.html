@@ -1,0 +1,136 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — Labs Champions
+  Power Pages Web Template · Name: "Innovo Champions"
+  URL: /champions
+
+  The homepage carries only an introductory banner linking here; every
+  Champion team is listed on this page.
+
+  A Champion is a TEAM, not an individual — it carries its members and
+  the initiative the team owns.
+
+  Grouped by business unit rather than listed flat, because the reader's
+  actual question is "who do I talk to in MY unit" — a single A–Z list
+  makes them scan the whole thing to answer it.
+=============================================================================
+{% endcomment %}
+
+
+{% include 'Innovo Labs Head' %}
+{% fetchxml champions %}
+<fetch>
+  <entity name="innovo_champion">
+    <attribute name="innovo_championid" />
+    <attribute name="innovo_name" />
+    <attribute name="innovo_role" />
+    <attribute name="innovo_businessunit" />
+    <attribute name="innovo_photourl" />
+    <attribute name="innovo_initiative" />
+    <attribute name="innovo_summary" />
+    <attribute name="innovo_members" />
+    <order attribute="innovo_businessunit" />
+    <order attribute="innovo_sortorder" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+
+<section class="section" style="padding-top:calc(64px + var(--s-2xl))">
+  <span class="glow glow--lavender" style="width:560px;height:560px;top:-200px;left:-160px"></span>
+
+  <div class="wrap">
+    <a class="page-back" href="/" data-magnetic>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Home
+    </a>
+
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">Labs Champions</p>
+      <h1 class="section-title">The teams that own an initiative.</h1>
+    </div>
+
+    {% if champions.results.entities.size > 0 %}
+
+      {% comment %} group_by isn't available in Power Pages Liquid, so
+         track the previous value and emit a heading on change. The
+         FetchXML above orders by business unit, which makes this safe. {% endcomment %}
+      {% assign current_bu = '' %}
+
+      {% for c in champions.results.entities %}
+        {% assign bu = c.innovo_businessunit | default: 'Group' %}
+
+        {% if bu != current_bu %}
+          {% unless forloop.first %}
+            </div>
+          {% endunless %}
+          <h2 class="section-title"
+              style="font-size:var(--fs-h2);margin:var(--s-2xl) 0 var(--s-md)"
+              data-reveal>{{ bu }}</h2>
+          <div class="people" data-reveal-group>
+          {% assign current_bu = bu %}
+        {% endif %}
+
+        <article class="person" data-reveal>
+          <div class="person__photo">
+            {% if c.innovo_photourl %}
+              <img src="{{ c.innovo_photourl | escape }}"
+                   alt="{{ c.innovo_name | escape }}"
+                   loading="lazy" width="440" height="440">
+            {% else %}
+              {% comment %}
+                Initials fallback, so a champion without a photo still looks
+                deliberate rather than broken. Marketing will not have
+                portraits for everyone on day one.
+              {% endcomment %}
+              <div class="person__initials" aria-hidden="true">{{ c.innovo_name | split: ' ' | first | slice: 0 }}{{ c.innovo_name | split: ' ' | last | slice: 0 }}</div>
+            {% endif %}
+          </div>
+          <div class="person__body">
+            <p class="person__name">{{ c.innovo_name }}</p>
+            <p class="person__role">{{ c.innovo_role }}</p>
+
+            {% comment %} innovo_members is a comma-separated list on the row —
+               Dataverse has no repeating field, and a child table would mean a
+               second query per card. Blank entries are skipped so a trailing
+               comma does not render an empty chip. {% endcomment %}
+            {% if c.innovo_members %}
+              {% assign members = c.innovo_members | split: ',' %}
+              <span class="person__count">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>{{ members.size }} people
+              </span>
+              <div class="person__members">
+                {% for m in members %}
+                  {% assign name = m | strip %}
+                  {% if name != '' %}<span class="person__member">{{ name }}</span>{% endif %}
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            {% if c.innovo_initiative %}
+              <p class="person__role" style="margin-top:var(--s-xs);color:var(--text-soft)">
+                Leading: {{ c.innovo_initiative }}
+              </p>
+            {% endif %}
+            {% if c.innovo_summary %}
+              <p class="person__role" style="margin-top:var(--s-2xs)">{{ c.innovo_summary }}</p>
+            {% endif %}
+            <span class="person__bu">{{ bu }}</span>
+          </div>
+        </article>
+
+        {% if forloop.last %}
+          </div>
+        {% endif %}
+      {% endfor %}
+
+    {% else %}
+      <div class="empty">
+        <div class="empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        </div>
+        <p style="color:var(--text-soft)">Champions haven't been published yet.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% include 'Innovo Labs Foot' %}

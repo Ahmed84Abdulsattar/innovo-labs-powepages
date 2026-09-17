@@ -1,0 +1,16 @@
+adx_accountrelationship: 
+adx_append: false
+adx_appendto: false
+adx_contactrelationship: innovo_idea_Contact_contact
+adx_create: false
+adx_delete: false
+adx_entitylogicalname: innovo_idea
+adx_entityname: Innovo Idea – own records
+adx_entitypermission_webrole:
+- ee537163-2caa-457c-af7b-2b131601134b
+adx_entitypermissionid: 0dbde385-555c-47ad-bde4-2a22ebbea274
+adx_parententitypermission: 
+adx_parentrelationship: 
+adx_read: true
+adx_scope: 756150001
+adx_write: false

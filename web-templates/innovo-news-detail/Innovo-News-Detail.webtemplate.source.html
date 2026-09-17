@@ -1,0 +1,229 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — Article detail
+  Power Pages Web Template · Name: "Innovo News Detail"
+  URL: /news/article?slug=<slug>
+
+  Read-only page. The only interactive elements are navigation and the
+  video player.
+
+  Full-length videos are SharePoint / Microsoft Stream iframes, NOT files
+  on the CDN. A 5-minute 1080p MP4 is 50–150 MB and would be downloaded
+  in full, progressively, with no quality adaptation. SharePoint gives
+  adaptive bitrate, auto-captions and no size ceiling — and IT already
+  trusts it.
+=============================================================================
+{% endcomment %}
+
+
+{% include 'Innovo Labs Head' %}
+{% assign slug = request.params['slug'] | default: page.adx_partialurl %}
+
+{% fetchxml article %}
+<fetch top="1">
+  <entity name="innovo_newspost">
+    <attribute name="innovo_newspostid" />
+    <attribute name="innovo_title" />
+    <attribute name="innovo_slug" />
+    <attribute name="innovo_summary" />
+    <attribute name="innovo_body" />
+    <attribute name="innovo_category" />
+    <attribute name="innovo_publishedon" />
+    <attribute name="innovo_thumbnailurl" />
+    <attribute name="innovo_videoembedurl" />
+    <filter type="and">
+      <condition attribute="innovo_slug" operator="eq" value="{{ slug | escape }}" />
+      <condition attribute="statuscode" operator="eq" value="1" />
+    </filter>
+  </entity>
+</fetch>
+{% endfetchxml %}
+{% assign a = false %}
+{% if article.results.entities.size > 0 %}{% assign a = article.results.entities[0] %}{% endif %}
+
+{% if a %}
+
+  {% assign hero = a.innovo_thumbnailurl %}
+  {% unless hero %}
+    {% assign hero = '/_api/innovo_newsposts(' | append: a.innovo_newspostid | append: ')/innovo_thumbnail/$value' %}
+  {% endunless %}
+
+  <article>
+    <header class="wrap article__head">
+      {% comment %}
+        One back link only. The .page-back button is the pattern every other
+        page uses; the older .link-arrow copy below it said the same thing to
+        the same place and read as a bug.
+      {% endcomment %}
+      <a class="page-back" href="/news" data-magnetic>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        All news
+      </a>
+
+      <p class="eyebrow" style="margin-top:var(--s-md)">{{ a.innovo_category }}</p>
+      <h1 class="article__title">{{ a.innovo_title }}</h1>
+
+      <div class="article__meta">
+        <time datetime="{{ a.innovo_publishedon | date: 'yyyy-MM-dd' }}">
+          {{ a.innovo_publishedon | date: 'd MMMM yyyy' }}
+        </time>
+      </div>
+    </header>
+
+    <div class="wrap">
+      {% comment %}
+        If the post carries a full video, that becomes the hero and the
+        still image is dropped — showing both is redundant and pushes
+        the article text below the fold for no benefit.
+      {% endcomment %}
+      {% if a.innovo_videoembedurl %}
+        {% comment %}
+          Two kinds of value land in this field.
+
+          A hosting service (SharePoint/Stream embed, YouTube, Vimeo) needs an
+          iframe. A video uploaded as a Web File is a plain .mp4 served by
+          Power Pages itself — framing that gives the browser's bare default
+          player, so it gets a real <video> element with our own controls.
+
+          Self-hosting also sidesteps SharePoint's sign-in wall, which is why
+          it is the better option for short clips.
+        {% endcomment %}
+        {% assign vurl = a.innovo_videoembedurl | downcase %}
+        {% assign is_file = false %}
+        {% if vurl contains '.mp4' %}{% assign is_file = true %}{% endif %}
+        {% if vurl contains '.webm' %}{% assign is_file = true %}{% endif %}
+
+        <div class="video-embed" style="margin-bottom:var(--s-2xl)" data-reveal="scale">
+          {% if is_file %}
+            <video controls playsinline preload="auto"
+                   disablepictureinpicture disableremoteplayback
+                   controlslist="nodownload noplaybackrate noremoteplayback"
+                   {% if a.innovo_thumbnailurl %}poster="{{ a.innovo_thumbnailurl | escape }}"{% endif %}>
+              <source src="{{ a.innovo_videoembedurl | escape }}">
+              <p>Your browser cannot play this video.
+                 <a href="{{ a.innovo_videoembedurl | escape }}">Download it instead</a>.</p>
+            </video>
+          {% else %}
+            <iframe src="{{ a.innovo_videoembedurl | escape }}"
+                    title="{{ a.innovo_title | escape }}"
+                    allowfullscreen
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"></iframe>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="article__hero" data-reveal="scale">
+          <img src="{{ hero }}" alt="" width="1400" height="600" fetchpriority="high">
+        </div>
+      {% endif %}
+
+      {% if a.innovo_summary %}
+        <p class="prose" style="font-size:var(--fs-lead);color:var(--text);font-weight:500;margin-bottom:var(--s-lg)">
+          {{ a.innovo_summary }}
+        </p>
+      {% endif %}
+
+      {% comment %}
+        The Body column may hold either real HTML (Rich Text format, or HTML
+        pasted by hand) or plain text pasted out of an email.
+
+        Plain text renders as one unbroken run, because a newline means
+        nothing in HTML. Rather than demanding authors write markup, detect
+        the plain case and wrap each non-empty line in its own <p> — that
+        restores paragraph breaks and picks up .prose spacing.
+
+        Headings and bullets still need Rich Text on the column; this only
+        guarantees the text is never an unreadable wall.
+      {% endcomment %}
+      {% assign body_raw = a.innovo_body %}
+      {% assign is_html = false %}
+      {% if body_raw contains '</p>' %}{% assign is_html = true %}{% endif %}
+      {% if body_raw contains '</h2>' %}{% assign is_html = true %}{% endif %}
+      {% if body_raw contains '</h3>' %}{% assign is_html = true %}{% endif %}
+      {% if body_raw contains '</ul>' %}{% assign is_html = true %}{% endif %}
+      {% if body_raw contains '</ol>' %}{% assign is_html = true %}{% endif %}
+      {% if body_raw contains '</div>' %}{% assign is_html = true %}{% endif %}
+
+      <div class="prose" data-reveal="fade">
+        {% if is_html %}
+          {{ body_raw }}
+        {% else %}
+          {% comment %}
+            Splitting on a literal newline would put a line break inside the
+            tag itself, and Power Pages requires a tag to open and close on
+            the same line — it fails to parse otherwise. newline_to_br turns
+            each break into a br element, which can then be split on without
+            the tag ever leaving its line.
+
+            Note also: a comment block is still tokenised for tags. Writing
+            Liquid delimiters in here is only safe when what they enclose is
+            a real, valid tag — an illustrative or partial one is parsed,
+            found invalid, and takes the whole page down. Hence prose.
+          {% endcomment %}
+          {% assign body_lines = body_raw | newline_to_br | split: '<br />' %}
+          {% for line in body_lines %}
+            {% assign line_clean = line | strip %}
+            {% unless line_clean == '' %}<p>{{ line_clean }}</p>{% endunless %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </article>
+
+  {% comment %} ---------- More stories ---------- {% endcomment %}
+  {% fetchxml more %}
+  <fetch top="3">
+    <entity name="innovo_newspost">
+      <attribute name="innovo_newspostid" />
+      <attribute name="innovo_title" />
+      <attribute name="innovo_slug" />
+      <attribute name="innovo_summary" />
+      <attribute name="innovo_category" />
+      <attribute name="innovo_publishedon" />
+        <attribute name="innovo_thumbnailurl" />
+      <attribute name="innovo_teaserclipurl" />
+      <attribute name="innovo_hasvideo" />
+      <attribute name="innovo_videoembedurl" />
+      <filter type="and">
+        <condition attribute="statuscode" operator="eq" value="1" />
+        <condition attribute="innovo_slug" operator="ne" value="{{ slug | escape }}" />
+      </filter>
+      <order attribute="innovo_publishedon" descending="true" />
+    </entity>
+  </fetch>
+  {% endfetchxml %}
+
+  {% if more.results.entities.size > 0 %}
+    <section class="section section--tint" style="margin-top:var(--s-3xl)">
+      <div class="wrap">
+        <div class="section-head" data-reveal>
+          <p class="eyebrow">Watch next</p>
+          <h2 class="section-title" style="font-size:var(--fs-h2)">More from Innovo Labs</h2>
+        </div>
+        <div class="news-grid" data-reveal-group>
+          {% for post in more.results.entities %}
+            {% include 'Innovo News Card' post: post %}
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  {% endif %}
+
+{% else %}
+
+  <section class="section" style="padding-top:calc(64px + var(--s-3xl))">
+    <div class="wrap">
+      <div class="empty">
+        <div class="empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        </div>
+        <p style="color:var(--text-soft);margin-bottom:var(--s-md)">
+          That story isn't available — it may have been moved or unpublished.
+        </p>
+        <a class="btn btn--ghost" href="/news">Back to all news</a>
+      </div>
+    </div>
+  </section>
+
+{% endif %}
+{% include 'Innovo Labs Foot' %}

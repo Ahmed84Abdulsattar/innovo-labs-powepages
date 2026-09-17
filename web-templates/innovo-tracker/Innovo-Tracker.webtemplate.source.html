@@ -1,0 +1,347 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — Innovation Tracker (standalone page)
+  Power Pages Web Template · Name: "Innovo Tracker"
+  URL: /tracker
+
+  The homepage carries a condensed version of this; here it is expanded
+  with the trend across snapshots and a per-business-unit breakdown.
+
+  Figures are entered by hand in Dataverse — IT declined an automated
+  read from the internal portal. Everything below therefore leans on the
+  "as of" date being visible, not buried. A stale unlabelled statistic
+  quietly discredits every other number on the site.
+=============================================================================
+{% endcomment %}
+
+
+{% include 'Innovo Labs Head' %}
+{% comment %} Latest snapshot, plus the previous one so we can show movement {% endcomment %}
+{% fetchxml snaps %}
+<fetch top="2">
+  <entity name="innovo_trackersnapshot">
+    <attribute name="innovo_totaladopted" />
+    <attribute name="innovo_activeinitiatives" />
+    <attribute name="innovo_costsaving" />
+    <attribute name="innovo_timesaving" />
+    <attribute name="innovo_injuriesprevented" />
+    <attribute name="innovo_qualitysaving" />
+    <attribute name="innovo_esgoffset" />
+    <attribute name="innovo_asofdate" />
+    <order attribute="innovo_asofdate" descending="true" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+
+{% assign t    = false %}
+{% assign prev = false %}
+{% if snaps.results.entities.size > 0 %}{% assign t = snaps.results.entities[0] %}{% endif %}
+{% comment %} Only present once a second snapshot exists — drives the
+   "+3 since last update" deltas. {% endcomment %}
+{% if snaps.results.entities.size > 1 %}{% assign prev = snaps.results.entities[1] %}{% endif %}
+
+{% comment %} Every initiative in one query, split in Liquid below.
+
+   This was two queries filtered on Is live (eq 1 / eq 0). That is one round
+   trip more than necessary, and the eq 0 half threw — a row whose Is live was
+   never set is neither 1 nor 0, so the filter could not express "not live"
+   without also deciding what to do about null. Fetching the set once and
+   sorting it here removes the filter, the second round trip, and the null
+   question together: anything not flagged live is on radar, which is the rule
+   the page actually means. {% endcomment %}
+{% fetchxml inits %}
+<fetch>
+  <entity name="innovo_liveinitiative">
+    <attribute name="innovo_name" />
+    <attribute name="innovo_businessunit" />
+    <attribute name="innovo_driver" />
+    <attribute name="innovo_value" />
+    <attribute name="innovo_sortorder" />
+    <attribute name="innovo_islive" />
+    <filter type="and">
+      <condition attribute="statecode" operator="eq" value="0" />
+    </filter>
+    <order attribute="innovo_sortorder" />
+    <order attribute="innovo_businessunit" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+
+{% comment %} Counted once here so the headline figures and the section guards
+   below cannot disagree with what the lists actually render. {% endcomment %}
+{% assign n_live = 0 %}
+{% assign n_radar = 0 %}
+{% for i in inits.results.entities %}{% if i.innovo_islive %}{% assign n_live = n_live | plus: 1 %}{% else %}{% assign n_radar = n_radar | plus: 1 %}{% endif %}{% endfor %}
+
+<section class="section" style="padding-top:calc(64px + var(--s-2xl))">
+  <span class="glow glow--aqua" style="width:560px;height:560px;top:-200px;right:-160px"></span>
+
+  <div class="wrap">
+    <a class="page-back" href="/" data-magnetic>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Home
+    </a>
+
+    {% comment %}
+      Headline left, figures right. The figures are what this page asserts,
+      so they sit level with the claim rather than below it — and the
+      In-flight list comes up within a screen as a result.
+    {% endcomment %}
+    <div class="tracker-hero">
+    <div class="section-head" data-reveal style="margin-bottom:0">
+      <p class="eyebrow">Innovation Tracker</p>
+      <h1 class="section-title">What we're trialling, what's in flight, and what it's returning.</h1>
+    </div>
+
+    {% if t %}
+
+      <div class="tracker-kpis">
+      {% comment %} ---- Programme counts ---- {% endcomment %}
+      <div class="tracker tracker--three" data-reveal="scale">
+        {% comment %} Adopted → In flight → On radar: verified first, then running,
+           then under evaluation. Ideas submitted moved to the Innovators of Tomorrow
+           panel on the homepage — it measures how many people entered the campaign,
+           not what the programme has returned, and reading it beside verified figures
+           invited the wrong comparison.
+
+           On radar and In flight are counted from the initiative rows rather than
+           entered by hand. That table is world-readable, so every visitor sees the
+           same count. {% endcomment %}
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+            Total adopted
+          </p>
+          <p class="stat__value"><span data-count="{{ t.innovo_totaladopted | default: 0 }}">0</span></p>
+          <p class="stat__sub">
+            across all business units
+            {% if prev %}
+              {% assign d = t.innovo_totaladopted | minus: prev.innovo_totaladopted %}
+              {% if d > 0 %}<br><span style="color:var(--accent);font-weight:500">+{{ d }} since last update</span>{% endif %}
+            {% endif %}
+          </p>
+        </div>
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12h4l3-7 4 14 3-7h6"/></svg>
+            In flight
+          </p>
+          <p class="stat__value"><span data-count="{{ n_live }}">0</span></p>
+          <p class="stat__sub">running now</p>
+        </div>
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            On radar
+          </p>
+          <p class="stat__value"><span data-count="{{ n_radar }}">0</span></p>
+          <p class="stat__sub">being evaluated</p>
+        </div>
+      </div>
+
+      {% comment %} ---- The five pillars ---- {% endcomment %}
+      <div class="tracker__pillars" data-reveal="scale">
+        <div class="stat">
+          <p class="stat__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Cost</p>
+          <p class="stat__value"><span data-count="{{ t.innovo_costsaving | default: 0 }}" data-decimals="1">0</span><span class="unit">M AED</span></p>
+          <p class="stat__sub">saved per year</p>
+        </div>
+        <div class="stat">
+          <p class="stat__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Time</p>
+          <p class="stat__value"><span data-count="{{ t.innovo_timesaving | default: 0 }}">0</span><span class="unit">hrs/yr</span></p>
+          <p class="stat__sub">returned to teams</p>
+        </div>
+        <div class="stat">
+          <p class="stat__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Safety</p>
+          <p class="stat__value"><span data-count="{{ t.innovo_injuriesprevented | default: 0 }}">0</span><span class="unit unit--sym">%</span></p>
+          <p class="stat__sub">reduction in critical alerts</p>
+        </div>
+        <div class="stat">
+          <p class="stat__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2 15.09 8.26 22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>Quality</p>
+          <p class="stat__value"><span data-count="{{ t.innovo_qualitysaving | default: 0 }}" data-decimals="1">0</span><span class="unit">M AED</span></p>
+          <p class="stat__sub">rework prevented</p>
+        </div>
+        <div class="stat">
+          <p class="stat__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/></svg>ESG</p>
+          <p class="stat__value"><span data-count="{{ t.innovo_esgoffset | default: 0 }}">0</span><span class="unit">MT CO&#8322;</span></p>
+          <p class="stat__sub">reduced</p>
+        </div>
+      </div>
+
+      {% comment %}
+        Inside the figures column, so the stamp sits directly under the grid
+        it describes. Outside it, it spanned the full page width and drifted
+        to the far left, away from the numbers it dates.
+      {% endcomment %}
+      <div class="tracker-foot" data-reveal="fade">
+        <p class="tracker-stamp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Figures updated {{ t.innovo_asofdate | date: 'MMMM yyyy' }}
+        </p>
+      </div>
+
+      </div>{% comment %} /tracker-kpis {% endcomment %}
+      </div>{% comment %} /tracker-hero {% endcomment %}
+
+    {% else %}
+      </div>{% comment %} /tracker-hero {% endcomment %}
+      <div class="empty">
+        <div class="empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        </div>
+        <p style="color:var(--text-soft)">Tracker figures haven't been published yet.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+
+{% comment %} ══════════ In flight ══════════
+  The figures above are aggregate; this is what sits behind them. A
+  reader who doubts a number can see the individual initiatives that
+  produced it, which is most of the argument for keeping it here.
+
+  Renders nothing at all when empty rather than an empty-state panel —
+  the tracker figures above already carry the page.
+{% endcomment %}
+{% if n_live > 0 %}
+{% comment %} Tight top: it belongs with the figures above, not apart from them {% endcomment %}
+<section class="section section--tight-top">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">In flight</p>
+      <h2 class="section-title">Everything currently in flight.</h2>
+    </div>
+
+    {% comment %} Everything is rendered; the cards past the ninth are hidden by a
+       class and revealed by the button. No second request, and the full list is
+       still in the HTML for search and for anyone without JavaScript — who sees
+       all of them, which is the right failure. {% endcomment %}
+    {% assign shown = 0 %}
+    <div class="news-grid" data-init-grid data-reveal-group>
+      {% for i in inits.results.entities %}{% if i.innovo_islive %}{% assign shown = shown | plus: 1 %}
+        <article class="pillar initiative-card{% if shown > 9 %} is-more{% endif %}" data-reveal data-spotlight>
+          <h3 class="pillar__name" style="font-size:var(--fs-h3)">{{ i.innovo_name }}</h3>
+          <p class="pillar__desc" style="color:var(--text);font-weight:500;margin-top:var(--s-2xs)">{{ i.innovo_value }}</p>
+          {% if i.innovo_businessunit != blank or i.innovo_driver != blank %}
+          <div class="initiative-card__foot">
+            {% if i.innovo_businessunit != blank %}<p class="pillar__desc">{{ i.innovo_businessunit }}</p>{% endif %}
+            {% if i.innovo_driver != blank %}<span class="person__bu">{{ i.innovo_driver }}</span>{% endif %}
+          </div>
+          {% endif %}
+        </article>{% endif %}
+      {% endfor %}
+    </div>
+
+    {% if n_live > 9 %}
+    <div style="margin-top:var(--s-xl);text-align:center">
+      <button class="btn btn--ghost" type="button" data-init-more>
+        Show all {{ n_live }}
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+
+{% comment %} ══════════ On radar ══════════
+  Evaluated, not running. Separate section rather than a flag on the in-flight
+  cards, because the distinction is the whole point: one list is what we are
+  claiming returns, the other is what we are still looking at.
+{% endcomment %}
+{% if n_radar > 0 %}
+<section class="section section--tight-top">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">On radar</p>
+      <h2 class="section-title">What we're evaluating next.</h2>
+      <p class="section-intro">Assessed against the five pillars before anything runs on a live project.</p>
+    </div>
+
+    {% comment %} Everything is rendered; the cards past the ninth are hidden by a
+       class and revealed by the button. No second request, and the full list is
+       still in the HTML for search and for anyone without JavaScript — who sees
+       all of them, which is the right failure. {% endcomment %}
+    {% assign shown = 0 %}
+    <div class="news-grid" data-init-grid data-reveal-group>
+      {% for i in inits.results.entities %}{% unless i.innovo_islive %}{% assign shown = shown | plus: 1 %}
+        <article class="pillar initiative-card{% if shown > 9 %} is-more{% endif %}" data-reveal data-spotlight>
+          <h3 class="pillar__name" style="font-size:var(--fs-h3)">{{ i.innovo_name }}</h3>
+          <p class="pillar__desc" style="color:var(--text);font-weight:500;margin-top:var(--s-2xs)">{{ i.innovo_value }}</p>
+          {% if i.innovo_businessunit != blank or i.innovo_driver != blank %}
+          <div class="initiative-card__foot">
+            {% if i.innovo_businessunit != blank %}<p class="pillar__desc">{{ i.innovo_businessunit }}</p>{% endif %}
+            {% if i.innovo_driver != blank %}<span class="person__bu">{{ i.innovo_driver }}</span>{% endif %}
+          </div>
+          {% endif %}
+        </article>{% endunless %}
+      {% endfor %}
+    </div>
+
+    {% if n_radar > 9 %}
+    <div style="margin-top:var(--s-xl);text-align:center">
+      <button class="btn btn--ghost" type="button" data-init-more>
+        Show all {{ n_radar }}
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+
+{% comment %} ══════════ How a figure gets here ══════════
+  Readers are sceptical of self-reported savings, and rightly so. This
+  section exists to show the number has a method behind it.
+{% endcomment %}
+<section class="section section--tint">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">How we measure</p>
+      <h2 class="section-title">Where these numbers come from.</h2>
+    </div>
+
+    <div class="pillars" data-reveal-group>
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </div>
+        <h3 class="pillar__name">1 · Baselined</h3>
+        <p class="pillar__desc">Before anything runs, the team records how long the task takes and what it costs today.</p>
+      </article>
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <h3 class="pillar__name">2 · Piloted</h3>
+        <p class="pillar__desc">The initiative runs on a live project, not a demo — measured against that same baseline.</p>
+      </article>
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        </div>
+        <h3 class="pillar__name">3 · Verified</h3>
+        <p class="pillar__desc">The business unit signs off the delta before it is counted. Unverified savings are excluded.</p>
+      </article>
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.6"/><path d="M21 3v6h-6"/></svg>
+        </div>
+        <h3 class="pillar__name">4 · Annualised</h3>
+        <p class="pillar__desc">The verified figure is scaled to a full year at current deployment, and re-checked each quarter.</p>
+      </article>
+    </div>
+
+    <p style="margin-top:var(--s-xl);font-size:var(--fs-sm);color:var(--text-muted);max-width:60ch" data-reveal="fade">
+      Figures are cumulative across all in-flight and piloting initiatives, and are
+      refreshed by the Digital Innovation team. Anything still in
+      pre-evaluation is excluded until it has a verified baseline.
+    </p>
+  </div>
+</section>
+{% include 'Innovo Labs Foot' %}

@@ -1,0 +1,2837 @@
+/* ==========================================================================
+   INNOVO LABS — Digital Initiatives Microsite
+   Power Pages stylesheet · upload as Web File: innovo-labs.css
+
+   TYPEFACE — mandated by Innovo Brand Guidelines 1.9:
+     "The Innovo typeface is Poppins and should be used across all
+      communications in digital and print."
+     "Use: Semi bold for headings, Medium for sub headings,
+      Light for body copy."
+   One family, three roles. 600 / 500 / 300.
+
+   THEME — light. See §1 for why the bright brand accents are used as
+   surfaces rather than as ink.
+
+   Easing cubic-bezier(0.16, 1, 0.3, 1) is shared with the internal
+   Innovo Labs portal so motion feels continuous across both properties.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------
+   0 · FONT
+   Self-hosted. Power Pages tenants often run a strict CSP that blocks
+   fonts.googleapis.com, and self-hosting removes a third-party DNS
+   lookup from the critical path.
+
+   Paths are root-relative on purpose: Power Pages does not run Liquid
+   over static CSS Web Files, so a '~/' prefix is emitted literally
+   and 404s. Verified in the browser.
+   --------------------------------------------------------------- */
+@font-face {
+  font-family: 'Poppins';
+  src: url('/innovo-poppins-light.woff2') format('woff2');
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Poppins';
+  src: url('/innovo-poppins-regular.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Poppins';
+  src: url('/innovo-poppins-medium.woff2') format('woff2');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Poppins';
+  src: url('/innovo-poppins-semibold.woff2') format('woff2');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+/* Arabic companion, per the guidelines. Only loaded if :lang(ar) is used. */
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  src: url('/innovo-notokufiarabic-regular.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+/* ---------------------------------------------------------------
+   1 · DESIGN TOKENS — LIGHT THEME
+
+   The accent is the Labs wordmark blue. Measured against the canvas:
+     #122023  15.2:1  body and headings
+     #3d6699   5.4:1  accent ink — every link, eyebrow and label
+     #6b91c3   2.7:1  the literal logo blue — DISPLAY TYPE ONLY
+     #5c7075   5.9:1  muted body
+
+   #6b91c3 is the wordmark colour exactly, and it is used exactly once
+   as text: the hero word, at ~84px, where it reads as the logo rather
+   than as a link. At 11px eyebrow size the same colour is genuinely
+   hard to read, so everything functional uses #3d6699 — the same hue,
+   darkened until it is legible. Side by side at small sizes the two
+   are indistinguishable; only one of them can actually be read.
+
+   The other brand brights are surfaces, never ink:
+     #9ef3ee   1.2:1  invisible as text
+     #d4dcff   1.2:1  invisible as text
+   They appear as chip fills, washes, glows and card gradients, always
+   carrying #122023 text, which reads at 13:1 on the aqua.
+   --------------------------------------------------------------- */
+:root {
+  /* Brand — literal values from the guidelines */
+  --ink:        #122023;
+  --aqua:       #9ef3ee;
+  --labs-blue:  #6b91c3;
+  --paper:      #f2f5f6;
+  --lavender:   #d4dcff;
+
+  /* Canvas — warm vanilla off-white.
+     Deliberately warm against the brand's cool slate ink. Warm paper +
+     cool ink is the newsprint pairing; it reads as considered rather
+     than as a mismatch, and it stops a long scroll of white cards from
+     going clinical. */
+  --bg:         #faf8f3;   /* page — bright vanilla */
+  --surface:    #fffdf9;   /* cards — warm near-white */
+  --surface-2:  #f4f0e8;   /* inset panels */
+  --surface-3:  #eae4d8;   /* deeper inset / image placeholders */
+
+  /* Ink — brand slate stays cool; the greys are warmed slightly so
+     they don't read green against the vanilla. */
+  --text:       #122023;   /* 15.7:1 */
+  --text-soft:  #45484a;   /*  8.6:1 */
+  --text-muted: #6b6b68;   /*  5.3:1 */
+
+  /* Accent — the Labs wordmark blue.
+     Two values, same hue, for a reason:
+
+     --accent-brand is the literal logo blue #6b91c3. It measures only
+     2.7:1 on this canvas, so it is used ONLY for large display type
+     (the hero word) and for decorative fills — never for small text.
+
+     --accent is that blue darkened to 5.4:1 so it stays readable at
+     11px eyebrow and 14px link sizes. Same hue family; at those sizes
+     the two are indistinguishable to the eye, but one is legible and
+     the other is not. */
+  --accent-brand: #6b91c3;  /* 2.7:1 — display + decoration only */
+  --accent:       #3d6699;  /* 5.4:1 — all functional text */
+  --accent-hover: #2f5075;
+
+  /* Pale tint of the accent blue. Used wherever accent-coloured text or
+     icons sit on a fill, so the pairing stays in one hue family — a
+     blue icon on a cyan wash reads as a mismatch. 5.2:1 for --accent. */
+  --accent-wash:   #eaf0f8;
+
+  /* Brand brights, as surfaces only */
+  --aqua-wash:     #e7fbfa;
+  --aqua-fill:     #9ef3ee;
+  --lavender-wash: #f0f3ff;
+  --lavender-fill: #d4dcff;
+
+  /* Lines — warmed to sit on the vanilla without a grey halo */
+  --line:        #eae5da;
+  --line-strong: #d7d0c2;
+  --line-accent: rgba(61, 102, 153, 0.32);
+
+  /* Type */
+  --font: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Weight roles — fixed by the guidelines, do not improvise */
+  --w-heading: 600;   /* Semi bold */
+  --w-sub:     500;   /* Medium    */
+  --w-body:    300;   /* Light     */
+
+  --fs-hero:    clamp(2.5rem, 6.4vw, 5.25rem);
+  --fs-display: clamp(1.7rem, 3.2vw, 2.5rem);
+  --fs-h2:      clamp(1.25rem, 2vw,  1.7rem);
+  --fs-h3:      clamp(1.1rem, 1.5vw, 1.3rem);
+  --fs-lead:    clamp(1rem,   1.4vw, 1.2rem);
+  --fs-body:    1rem;
+  --fs-sm:      0.875rem;
+  --fs-label:   0.7rem;
+
+  /* Space */
+  /* Scaled down to shorten the page. Deliberately not uniform: the small
+     steps set the rhythm inside a paragraph or a card and stay near their
+     original values, while the large steps — which separate blocks and
+     sections — take most of the reduction. The hero re-declares the ones
+     it uses, so it is unaffected. */
+  --s-3xs: 0.25rem;  --s-2xs: 0.45rem; --s-xs: 0.65rem;
+  --s-sm:  0.875rem; --s-md:  1.15rem; --s-lg: 1.5rem;
+  --s-xl:  2.1rem;   --s-2xl: 2.75rem; --s-3xl: 4rem;
+  --s-4xl: 5rem;
+  /* Tightened from clamp(4rem, 9vw, 7rem). The homepage carries a lot of
+     sections; the old rhythm made it a long scroll for its content. */
+  --section-y:  clamp(2rem, 4.2vw, 3.25rem);
+  --gutter:     clamp(1.25rem, 5vw, 4rem);
+  --maxw:       1240px;
+  --maxw-prose: 68ch;
+
+  /* Shape */
+  --r-sm: 8px;  --r-md: 14px;  --r-lg: 20px;  --r-xl: 28px;  --r-pill: 999px;
+
+  /* Motion */
+  --ease:     cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast:   240ms;
+  --t-base:   420ms;
+  --t-slow:   600ms;
+  --t-reveal: 1300ms;
+
+  /* Elevation — light themes need far lower shadow opacity than dark
+     ones, or cards look dirty rather than raised. */
+  --shadow-sm: 0 1px 2px rgba(60, 48, 30, 0.06);
+  --shadow-md: 0 2px 6px rgba(60, 48, 30, 0.07), 0 8px 24px rgba(60, 48, 30, 0.06);
+  --shadow-lg: 0 4px 12px rgba(60, 48, 30, 0.08), 0 18px 48px rgba(60, 48, 30, 0.10);
+  --shadow-accent: 0 8px 28px rgba(61, 102, 153, 0.22);
+}
+
+/* ---------------------------------------------------------------
+   2 · RESET
+   --------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  font-weight: var(--w-body);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+:lang(ar) { font-family: 'Noto Kufi Arabic', var(--font); }
+
+img, svg, video, canvas { display: block; max-width: 100%; }
+img, video { height: auto; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+button { background: none; border: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+h1, h2, h3, h4 { line-height: 1.15; font-weight: var(--w-heading); text-wrap: balance; }
+p { text-wrap: pretty; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+::selection { background: var(--aqua-fill); color: var(--ink); }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: absolute; top: -100%; left: var(--s-sm); z-index: 200;
+  background: var(--ink); color: #fff;
+  padding: var(--s-2xs) var(--s-sm);
+  border-radius: var(--r-sm); font-weight: var(--w-sub);
+  transition: top var(--t-base) var(--ease);
+}
+.skip-link:focus { top: var(--s-sm); }
+
+/* ---------------------------------------------------------------
+   3 · LAYOUT
+   --------------------------------------------------------------- */
+.wrap {
+  width: 100%; max-width: var(--maxw);
+  margin-inline: auto; padding-inline: var(--gutter);
+}
+/* overflow-x: clip contains the .glow orbs, which are positioned with
+   negative offsets and are up to 600px across — on a 360px screen they
+   extended the document and gave the whole page a horizontal scrollbar.
+
+   `clip` rather than `hidden` on purpose: hidden would make each section a
+   scroll container, which breaks position:sticky and the smooth-scroll
+   anchors. clip just cuts the paint. */
+.section { padding-block: var(--section-y); position: relative; overflow-x: clip; }
+
+/* Alternating band, so long pages don't read as one flat sheet */
+.section--tint { background: var(--surface-2); }
+.section--wash { background: linear-gradient(180deg, var(--aqua-wash), var(--bg)); }
+
+/* Ambient glow. Far weaker than the dark theme — on a light canvas
+   these read as coloured haze, and anything stronger looks like a
+   printing error. */
+.glow {
+  position: absolute; border-radius: 50%;
+  filter: blur(100px); opacity: 0.55;
+  pointer-events: none; z-index: 0;
+}
+.glow--aqua     { background: radial-gradient(circle, rgba(158,243,238,0.55), transparent 70%); }
+.glow--blue     { background: radial-gradient(circle, rgba(107,145,195,0.32), transparent 70%); }
+.glow--lavender { background: radial-gradient(circle, rgba(212,220,255,0.55), transparent 70%); }
+
+.section > .wrap { position: relative; z-index: 1; }
+
+.section-head { max-width: 46rem; margin-bottom: var(--s-lg); }
+.section-head--center { margin-inline: auto; text-align: center; }
+
+/* TYPE HIERARCHY — the blue label is the section's NAME, so it is the
+   largest thing in the block. Everything below it steps down:
+
+     .eyebrow        blue, display size   ← the title
+     .section-title  dark, h2 size        ← the statement under it
+     .section-intro  muted, body size     ← the supporting copy
+
+   Sentence case, not uppercase: tracked capitals are legible at 11px
+   but shout at 3rem. */
+.eyebrow {
+  display: block;
+  font-size: var(--fs-display);
+  font-weight: var(--w-heading);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  color: var(--accent);
+  margin-bottom: var(--s-xs);
+  text-wrap: balance;
+}
+.eyebrow::before { content: none; }
+
+.section-title {
+  font-size: var(--fs-h2);
+  font-weight: var(--w-sub);
+  letter-spacing: -0.015em;
+  color: var(--text-soft);
+  max-width: 46ch;
+}
+.section-intro {
+  margin-top: var(--s-sm);
+  font-size: var(--fs-body);
+  font-weight: var(--w-body);
+  color: var(--text-muted);
+  max-width: 60ch;
+}
+
+/* Centred variants keep the same order */
+.section-head--center .eyebrow,
+.section-head--center .section-title { margin-inline: auto; }
+.section-head--center .section-intro { margin-inline: auto; }
+
+/* ---------------------------------------------------------------
+   4 · BUTTONS & LINKS
+   Min target 44px per WCAG 2.5.5.
+
+   NOTE: this site is read-only — announcements and news. There are
+   no submission or action CTAs. Buttons here are navigational only.
+   --------------------------------------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--s-2xs);
+  min-height: 48px; padding: 0 var(--s-md);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm); font-weight: var(--w-sub);
+  cursor: pointer; white-space: nowrap;
+  transition: transform var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease),
+              background-color var(--t-base) var(--ease),
+              border-color var(--t-base) var(--ease),
+              color var(--t-base) var(--ease);
+}
+.btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.btn--primary {
+  background: var(--ink); color: #fff;
+  box-shadow: var(--shadow-md);
+}
+.btn--primary:hover {
+  background: #1c3236;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.btn--primary:active { transform: translateY(0) scale(0.97); }
+
+.btn--accent {
+  background: var(--accent); color: #fff;
+  box-shadow: var(--shadow-accent);
+}
+.btn--accent:hover { background: var(--accent-hover); transform: translateY(-2px); }
+.btn--accent:active { transform: translateY(0) scale(0.97); }
+
+/* Large variant. Used for the hero CTA, which competes with a full-bleed
+   animation behind it and needs the extra weight to hold its own. */
+.btn--lg {
+  min-height: 56px; padding-inline: var(--s-xl);
+  font-size: 1.02rem; letter-spacing: -0.005em;
+}
+.btn--lg svg { width: 19px; height: 19px; }
+
+/* The ghost button sat almost flush with the page: a hairline in the same
+   family as the background, on a surface barely lighter than it. Given a
+   coloured edge, weight, and a shadow, it reads as something to press. */
+.btn--ghost {
+  background: var(--surface);
+  color: var(--text);
+  border: 1.5px solid var(--line-accent);
+  font-weight: var(--w-heading);
+  box-shadow: var(--shadow-md);
+}
+.btn--ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.btn--ghost:active { transform: translateY(0) scale(0.97); }
+
+.btn .arrow { transition: transform var(--t-base) var(--ease); }
+.btn:hover .arrow { transform: translateX(3px); }
+
+.link-arrow {
+  display: inline-flex; align-items: center; gap: var(--s-2xs);
+  font-size: var(--fs-sm); font-weight: var(--w-sub);
+  color: var(--accent);
+  padding-block: var(--s-3xs);
+  position: relative;
+}
+.link-arrow::after {
+  content: ''; position: absolute; left: 0; bottom: 0;
+  width: 100%; height: 1.5px; background: currentColor;
+  transform: scaleX(0); transform-origin: right;
+  transition: transform var(--t-base) var(--ease);
+}
+.link-arrow:hover::after { transform: scaleX(1); transform-origin: left; }
+.link-arrow svg { width: 14px; height: 14px; transition: transform var(--t-base) var(--ease); }
+.link-arrow:hover svg { transform: translateX(3px); }
+
+/* ---------------------------------------------------------------
+   5 · HEADER
+   --------------------------------------------------------------- */
+.site-header {
+  position: fixed; inset-inline: 0; top: 0; z-index: 100;
+  border-bottom: 1px solid transparent;
+  transition: background-color var(--t-base) var(--ease),
+              border-color var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease);
+}
+.site-header.is-stuck {
+  background: rgba(250, 248, 243, 0.88);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border-bottom-color: var(--line);
+  box-shadow: var(--shadow-sm);
+}
+
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-md); min-height: 64px;
+}
+.nav__logo { display: flex; align-items: center; }
+.nav__logo img { height: 28px; width: auto; }
+
+.nav__links { display: flex; align-items: center; gap: var(--s-3xs); list-style: none; padding: 0; }
+.nav__link {
+  display: inline-flex; align-items: center;
+  min-height: 44px; padding-inline: var(--s-sm);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm); font-weight: 400;
+  color: var(--text-soft);
+  transition: color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+/* Translucent rather than the flat --accent-wash token: the header is
+   transparent over the hero at the top of the page and a blurred bar once
+   stuck, so a solid tint that reads correctly on one looks wrong on the
+   other. #eaf0f8 measured 1.08:1 against the page — the same colour, to
+   the eye. At 0.20 this reads as 1.32:1.
+
+   Text steps to --accent-hover, the darker blue, rather than --accent.
+   A pill strong enough to see would have pushed plain --accent down to
+   4.22:1, under the 4.5 floor; the darker blue lifts it to 5.5:1 instead,
+   so the hover state ends up MORE readable than the resting one. */
+.nav__link:hover,
+.nav__link:focus-visible {
+  color: var(--accent-hover);
+  background: rgba(61, 102, 153, 0.20);
+}
+/* Current page keeps the heavier weight, so hover never impersonates it */
+.nav__link[aria-current="page"] { color: var(--accent); font-weight: var(--w-sub); }
+.nav__link[aria-current="page"]:hover { background: rgba(61, 102, 153, 0.26); }
+
+.nav__toggle { display: none; }
+
+@media (max-width: 900px) {
+  .nav__links {
+    position: fixed; inset: 64px 0 auto 0;
+    flex-direction: column; align-items: stretch; gap: 0;
+    background: rgba(250, 248, 243, 0.98);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    padding: var(--s-sm) var(--gutter) var(--s-lg);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-8px); opacity: 0; visibility: hidden;
+    transition: opacity var(--t-base) var(--ease),
+                transform var(--t-base) var(--ease), visibility var(--t-base);
+  }
+  .nav__links.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
+  .nav__link { min-height: 52px; font-size: 1rem; }
+  .nav__toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: var(--r-sm); color: var(--text);
+  }
+  .nav__toggle svg { width: 22px; height: 22px; }
+}
+
+/* ---------------------------------------------------------------
+   6 · HERO
+   Bright treatment: a strong white scrim over the footage, with dark
+   text on top. This is contrast-safe regardless of how bright or busy
+   the underlying video happens to be — the opposite way round (dark
+   scrim, white text) is what forces you to art-direct every clip.
+   --------------------------------------------------------------- */
+.hero {
+  position: relative;
+  min-height: 92svh;
+  /* The scale above was reduced to shorten the page; the hero is exempt.
+     Re-declaring the tokens it consumes keeps it exactly as it was, and
+     keeps the exemption in one visible place rather than spread through
+     the hero's own rules. */
+  --s-xs: 0.75rem; --s-md: 1.5rem; --s-xl: 3rem;
+  --s-3xl: 6rem;   --s-4xl: 8rem;
+  --fs-lead: clamp(1rem, 1.4vw, 1.2rem);
+  display: flex; align-items: center;
+  overflow: hidden;
+  /* The hero has no footage by default — the orbit animation is the
+     treatment. This gives it a ground of its own rather than leaving the
+     flat page colour behind the rings. Any video sits on top of it. */
+  background:
+    radial-gradient(ellipse 70% 60% at 20% 25%, var(--aqua-wash), transparent 65%),
+    radial-gradient(ellipse 65% 60% at 82% 70%, var(--lavender-wash), transparent 65%),
+    var(--bg);
+  background: var(--aqua-wash);
+}
+/* ---------------------------------------------------------------
+   6b · HERO LOGO STAGE
+
+   Replaces the background video. Built natively from the brand mark
+   rather than embedding the authored JSX component, which needed a
+   ~140 KB runtime, compiled JSX in the browser, and would very likely
+   trip a Power Pages CSP. This is ~2 KB of CSS and one image.
+
+   Orbits are pure transform rotation on the compositor, so the whole
+   thing costs essentially nothing.
+   --------------------------------------------------------------- */
+/* Centred: the hero is a single centred composition — rings and glow
+   behind, logo pill and copy stacked on top of them. */
+.logo-stage {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  pointer-events: none;
+  /* Above .hero__scrim (1), below .hero__content (3). See the note in the
+     hero markup — underneath the scrim none of this was legible. */
+  z-index: 2;
+}
+/* Rings sit slightly above centre so they frame the logo pill rather
+   than the paragraph below it. */
+.logo-stage { align-content: center; }
+
+/* Entrance ends on a clean slate — no residual filter. A filter that
+   survives (even blur(0)) keeps the mark on a rasterised layer, which is
+   the second way a logo ends up looking soft. */
+@keyframes markIn {
+  from { opacity: 0; transform: scale(0.88) translateY(14px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+@keyframes markFloat {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-12px); }
+}
+
+/* Concentric rings. Each is a bare ellipse that rotates at its own rate
+   and in alternating directions, which reads as orbit rather than spin.
+   Rings are deliberately stronger than a hairline — at 1px over a bright
+   scrim they were effectively invisible on anything but a good monitor. */
+.orbit {
+  position: absolute; z-index: 1;
+  /* Explicit rather than var(--line-accent) — that token is tuned for
+     hairline dividers on a solid surface, and these sit over the hero.
+     Kept at a whole 1px: Chrome snaps fractional borders to the device
+     grid and rendered 1.5px as a fuzzy 0.8px on these rotated elements.
+     Presence comes from the travelling arc below, not from ring weight. */
+  border: 1px solid rgba(61, 102, 153, 0.34);
+  border-radius: 50%;
+  opacity: 0;
+  animation: orbitIn 1.2s var(--ease) forwards, orbitSpin linear infinite;
+}
+.orbit--1 { width: min(56vw, 660px);  aspect-ratio: 1/1;      animation-delay: .25s, .25s; animation-duration: 1.2s, 26s; }
+.orbit--2 { width: min(74vw, 880px);  aspect-ratio: 1.35/1;   animation-delay: .40s, .40s; animation-duration: 1.2s, 38s; animation-direction: normal, reverse; }
+.orbit--3 { width: min(92vw, 1100px); aspect-ratio: 1.75/1;   animation-delay: .55s, .55s; animation-duration: 1.2s, 52s; }
+
+@keyframes orbitIn   { to { opacity: 1; } }
+@keyframes orbitSpin { to { rotate: 360deg; } }
+
+/* A bright arc riding each ring. A conic gradient masked to the ring's
+   own edge, so it reads as light travelling along the orbit rather than
+   a second ring. This is the change that makes the motion legible. */
+.orbit::before {
+  content: '';
+  position: absolute; inset: -1px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+    transparent 0deg,
+    rgba(61, 102, 153, 0.65) 24deg,
+    var(--aqua) 44deg,
+    rgba(61, 102, 153, 0.55) 64deg,
+    transparent 104deg);
+  /* Hollow the fill out into a 3px band on the ring's own edge */
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+}
+
+/* Nodes riding the rings — the moving accents that tell you the rings
+   are actually turning. One per ring, each at a different clock position. */
+.orbit::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: var(--accent-brand);
+}
+.orbit--1::after {
+  top: -6px; left: 50%; width: 12px; height: 12px; margin-left: -6px;
+  box-shadow: 0 0 0 7px rgba(107, 145, 195, 0.18), 0 0 20px 4px rgba(158, 243, 238, 0.75);
+  animation: nodePulse 2.6s var(--ease) infinite alternate;
+}
+.orbit--2::after {
+  top: 50%; right: -5px; width: 9px; height: 9px; margin-top: -4.5px;
+  background: var(--aqua);
+  box-shadow: 0 0 0 6px rgba(158, 243, 238, 0.22), 0 0 16px 3px rgba(158, 243, 238, 0.6);
+  animation: nodePulse 3.4s var(--ease) .4s infinite alternate;
+}
+.orbit--3::after {
+  bottom: -4px; left: 38%; width: 7px; height: 7px;
+  box-shadow: 0 0 0 5px rgba(107, 145, 195, 0.16), 0 0 14px 3px rgba(158, 243, 238, 0.5);
+  animation: nodePulse 4.2s var(--ease) .8s infinite alternate;
+}
+@keyframes nodePulse {
+  from { transform: scale(1);    opacity: .85; }
+  to   { transform: scale(1.45); opacity: 1; }
+}
+
+/* Rings that expand out of the mark and fade — a slow heartbeat under
+   the whole composition, so the hero still moves when the eye is at rest. */
+.logo-stage__pulse {
+  position: absolute; z-index: 1;
+  width: min(56vw, 660px); aspect-ratio: 1/1;
+  border: 1.5px solid rgba(61, 102, 153, 0.4);
+  border-radius: 50%;
+  opacity: 0;
+  animation: pulseOut 7s var(--ease) infinite;
+}
+.logo-stage__pulse--2 { animation-delay: 2.33s; }
+.logo-stage__pulse--3 { animation-delay: 4.66s; }
+@keyframes pulseOut {
+  0%   { transform: scale(0.55); opacity: 0; }
+  18%  { opacity: 0.55; }
+  100% { transform: scale(1.65); opacity: 0; }
+}
+
+/* Drifting motes. Each rises, fades in and out, and resets — enough
+   texture to read as a living scene, few enough to stay cheap. */
+.logo-stage__dust { position: absolute; inset: 0; z-index: 1; overflow: hidden; }
+.logo-stage__dust i {
+  position: absolute; bottom: -12px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent-brand); opacity: 0;
+  animation: dustRise linear infinite;
+}
+.logo-stage__dust i:nth-child(1) { left: 12%; animation-duration: 15s; animation-delay: 0s;   }
+.logo-stage__dust i:nth-child(2) { left: 27%; animation-duration: 19s; animation-delay: 2.5s; width: 4px; height: 4px; background: var(--aqua); }
+.logo-stage__dust i:nth-child(3) { left: 41%; animation-duration: 13s; animation-delay: 5s;   width: 3px; height: 3px; }
+.logo-stage__dust i:nth-child(4) { left: 58%; animation-duration: 21s; animation-delay: 1.2s; background: var(--aqua); }
+.logo-stage__dust i:nth-child(5) { left: 71%; animation-duration: 16s; animation-delay: 6.5s; width: 4px; height: 4px; }
+.logo-stage__dust i:nth-child(6) { left: 86%; animation-duration: 18s; animation-delay: 3.8s; width: 3px; height: 3px; background: var(--aqua); }
+@keyframes dustRise {
+  0%   { transform: translateY(0) translateX(0);      opacity: 0; }
+  12%  { opacity: 0.7; }
+  80%  { opacity: 0.5; }
+  100% { transform: translateY(-88vh) translateX(26px); opacity: 0; }
+}
+
+/* Soft colour wash behind the mark. Now that the stage paints in FRONT of
+   the scrim these values land at full strength, so they are lighter than
+   they look — at 0.7+ the wash tinted the entire hero and started eating
+   into the lead paragraph's contrast. */
+.logo-stage__glow {
+  position: absolute; z-index: 0;
+  width: min(80vw, 900px); aspect-ratio: 1/1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 38% 40%, rgba(158,243,238,0.38), transparent 62%),
+    radial-gradient(circle at 68% 62%, rgba(212,220,255,0.44), transparent 62%);
+  filter: blur(60px);
+  animation: glowDrift 18s var(--ease) infinite alternate;
+}
+
+@media (max-width: 768px) {
+  .logo-stage__mark { width: 62vw; }
+  .orbit--3 { display: none; }
+  /* Motes cost the most for the least on a small screen */
+  .logo-stage__dust i:nth-child(n+4) { display: none; }
+}
+
+.hero__media { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+
+/* Both layers are absolutely positioned so they STACK.
+   Left in normal flow they sit one after the other — the poster fills
+   the hero and the video gets pushed out below it, which reads as
+   "an image with a video leaking out behind it". The poster is the
+   fallback layer; the video sits on top and covers it completely
+   whenever it is playing. */
+.hero__media img,
+.hero__media video {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  animation: heroDrift 26s var(--ease) infinite alternate;
+}
+.hero__media video { z-index: 1; }
+@keyframes heroDrift {
+  from { transform: scale(1.06) translate3d(0, 0, 0); }
+  to   { transform: scale(1.16) translate3d(0, -1.5%, 0); }
+}
+
+/* Opaque enough on the left to guarantee text contrast whatever the
+   footage does; nearly clear on the right so the video is actually
+   visible. Tuned against the real render, not guessed. */
+.hero__scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    /* Top fade — gives the nav a light backing across the full width.
+       Without it the right-hand links sit directly on the photograph
+       and become unreadable the moment a bright frame comes up. */
+    linear-gradient(180deg,
+      rgba(250, 248, 243, 0.94) 0%,
+      rgba(250, 248, 243, 0.62) 9%,
+      transparent 22%),
+    /* Even radial wash. The composition is centred now, so a left-to-right
+       wedge would dim one half of a symmetrical layout. */
+    radial-gradient(ellipse 80% 70% at 50% 45%,
+      rgba(250, 248, 243, 0.55) 0%,
+      rgba(250, 248, 243, 0.80) 70%,
+      rgba(250, 248, 243, 0.94) 100%),
+    /* Bottom fade into the page colour, so there is no seam */
+    linear-gradient(180deg, transparent 55%, var(--bg) 100%);
+}
+
+.hero__content {
+  position: relative; z-index: 3;   /* above .logo-stage (2) */
+  padding-block: var(--s-4xl) var(--s-3xl);
+  /* Single centred column, matching the logo animation's own layout */
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+/* The logo pill — white lozenge holding the wordmark, exactly as the
+   animation composes it. Sits in the content flow so the copy stacks
+   underneath it rather than beside it. */
+.hero__logo {
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: clamp(var(--s-md), 3vw, var(--s-xl));
+  animation: markIn 1.4s var(--ease) both,
+             markFloat 9s var(--ease) 1.4s infinite alternate;
+}
+.hero__logo img {
+  width: min(46vw, 440px); height: auto;
+  display: block;
+  /* Soft lift so the mark reads against the rings without a container */
+  filter: drop-shadow(0 14px 44px rgba(18, 32, 35, 0.12));
+}
+
+/* Tagline runs on one horizontal line, separated by middots */
+.hero__title {
+  font-size: clamp(1.6rem, 4.4vw, 3.4rem);
+  font-weight: var(--w-heading);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  max-width: 22ch;
+}
+/* The mask that makes each word rise into place. `overflow: hidden` is
+   what does the masking — but it also clips anything below the baseline,
+   so descenders (g, y, p, j, q) lost their tails.
+
+   Extending the box downward and pulling it back with an equal negative
+   margin gives the descender room to render without moving the text or
+   changing the line box. */
+.word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
+}
+.word__i {
+  display: inline-block;
+  transition: transform var(--t-reveal) var(--ease);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+.js .word__i { transform: translateY(105%); }
+.js .is-revealed .word__i { transform: translateY(0); }
+
+/* Hero headline is a single black statement — "Lead." carries the line
+   on its own without a colour change. */
+.hero__title .accent { color: inherit; }
+
+.hero__lead {
+  margin-top: var(--s-md);
+  max-width: 60ch;
+  font-size: var(--fs-lead);
+  font-weight: var(--w-body);
+  color: var(--text-soft);
+}
+.hero__actions {
+  margin-top: var(--s-xl);
+  display: flex; flex-wrap: wrap; gap: var(--s-xs);
+  justify-content: center;
+}
+
+.hero__cue {
+  position: absolute; bottom: var(--s-lg); left: 50%;
+  transform: translateX(-50%); z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-2xs);
+  font-size: var(--fs-label); letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.hero__cue-line {
+  width: 2px; height: 40px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent), transparent);
+  animation: cueDrop 2.4s var(--ease) infinite;
+}
+@keyframes cueDrop {
+  0%   { transform: scaleY(0); transform-origin: top; opacity: 0; }
+  35%  { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  70%  { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .hero__media video { display: none; }
+  .hero__cue { display: none; }
+  .hero__scrim { background: rgba(250, 248, 243, 0.92); }
+}
+
+/* ---------------------------------------------------------------
+   7 · PILLARS
+   --------------------------------------------------------------- */
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--s-xs);
+}
+.pillar {
+  position: relative; overflow: hidden;
+  padding: var(--s-lg) var(--s-md) var(--s-md);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease);
+}
+/* ---- Cursor-following spotlight, ported from the internal portal -------
+   The portal sets --mx / --my on mousemove and paints a radial highlight
+   at that point. Same numbers here (300px circle, 62% falloff, 0.4s fade)
+   so the two properties feel like one product.
+
+   The tint is #6b91c3 — the blue sampled from "Labs" in the wordmark.
+   Alpha is 0.42 rather than the aqua's 0.55 it replaces: blue is a much
+   darker hue, so matching alpha would have made the highlight roughly
+   60% heavier. At 0.42 it peaks at 1.54:1 against the card — clearly
+   present — while the body text stays at 10.7:1. */
+/* Roomier than the five-pillar cards: the value line is free text and
+   marketing will write sentences, not labels. min-height keeps a short
+   one from collapsing next to a long one in the same row. */
+.initiative-card {
+  --mx: 50%; --my: -30%;
+  padding: var(--s-lg) var(--s-md);
+  min-height: 150px;
+  display: flex; flex-direction: column;
+}
+.initiative-card .pillar__desc { overflow-wrap: anywhere; }
+/* Without this the chip stretches to the full card width — flex children
+   default to stretch on the cross axis. */
+.initiative-card .person__bu { align-self: flex-start; }
+/* Business unit and driver sit at the bottom whatever the text above does */
+.initiative-card__foot {
+  margin-top: auto; padding-top: var(--s-xs);
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: var(--s-2xs);
+}
+/* Cursor-following glow. Safe to keep now that the card itself no longer
+   translates on hover — the blur came from moving the text, not from the
+   gradient underneath it. */
+.initiative-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(300px circle at var(--mx) var(--my),
+              rgba(107, 145, 195, 0.42), transparent 62%);
+  opacity: 0;
+  transition: opacity .4s var(--ease);
+  pointer-events: none;
+  z-index: 0;
+}
+/* Content must sit above the highlight or the gradient washes over the text */
+.initiative-card > * { position: relative; z-index: 1; }
+.initiative-card:hover::before { opacity: 1; }
+
+.pillar:hover {
+  border-color: var(--line-accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+}
+.pillar::after {
+  content: ''; position: absolute; inset-inline: 0; bottom: 0; height: 3px;
+  background: linear-gradient(90deg, var(--aqua-fill), var(--accent));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform var(--t-slow) var(--ease);
+}
+.pillar:hover::after { transform: scaleX(1); }
+
+.pillar__icon {
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border-radius: var(--r-md);
+  background: var(--accent-wash);
+  color: var(--accent);
+  margin-bottom: var(--s-md);
+}
+.pillar__icon svg { width: 20px; height: 20px; }
+.pillar__name { font-size: var(--fs-h3); font-weight: var(--w-heading); margin-bottom: var(--s-3xs); }
+.pillar__desc { font-size: var(--fs-sm); color: var(--text-muted); }
+
+/* ---------------------------------------------------------------
+   8 · INNOVATION TRACKER
+   Figures are maintained by hand in Dataverse, so the "Updated"
+   stamp is not decoration — an unlabelled stale statistic quietly
+   discredits everything else on the page.
+
+   Split 2 + 5 rather than one auto-fit row: seven cells left an
+   orphan, and this grouping mirrors the five pillars above.
+   --------------------------------------------------------------- */
+/* minmax(0, 1fr) throughout, not 1fr. A bare 1fr has an automatic minimum of
+   the content's own width, and .stat__value is nowrap — so five cells holding
+   "13,260 hrs/yr" and "200 MT CO2" summed to more than the container and the
+   pillar row broke out past both edges of the page. minmax(0, …) lets a cell
+   shrink below its content, which is what keeps the two rows the same width. */
+.tracker, .tracker__pillars {
+  display: grid; gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+/* One headline count, then the five value drivers beneath it. A single
+   cell in a 2-column grid left the other half showing the container's
+   line colour, which read as a broken card. */
+.tracker           { grid-template-columns: minmax(0, 1fr); border-radius: var(--r-lg) var(--r-lg) 0 0; }
+/* The headline row reads left to right as a funnel: how many were offered,
+   how many we are looking at, how many are running, how many stuck. */
+.tracker--two      { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tracker--three    { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tracker--four     { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .tracker--four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Three does not halve cleanly, so it goes straight to a single column rather
+   than leaving one cell stranded on a second row. */
+@media (max-width: 760px) { .tracker--three { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .tracker--two, .tracker--four { grid-template-columns: minmax(0, 1fr); } }
+
+/* Hover states carry more than a colour shift now — the border takes the
+   accent and the shadow deepens, so the control answers the pointer. */
+.btn--ghost:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 18px rgba(61,102,153,0.18), var(--shadow-md);
+}
+.btn--accent { box-shadow: 0 4px 16px rgba(61,102,153,0.28); }
+.btn--accent:hover { box-shadow: 0 6px 22px rgba(61,102,153,0.38); }
+
+/* A ring on keyboard focus, on every button. Hover alone left keyboard users
+   with nothing to follow. */
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(61,102,153,0.30), var(--shadow-md);
+}
+
+/* A video card carries its title over the still, so 16:9 left the picture
+   squeezed between the badge and the type. 4:3 gives the image room above the
+   title without making the card tower over the text-only ones. */
+.card:not(.card--textonly) .card__media { aspect-ratio: 4 / 3; }
+.news-grid { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+.news-grid--home { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+@media (max-width: 760px) {
+  .card:not(.card--textonly) .card__media { aspect-ratio: 16 / 10; }
+}
+
+/* ---------------------------------------------------------------
+   VIDEO CARDS
+   A post with media shows the still and its title, nothing else. The
+   title sits on the image the way it does on a video thumbnail — no
+   panel below, so the card reads as one object rather than a picture
+   stacked on a box of text.
+   --------------------------------------------------------------- */
+.card:not(.card--textonly) { display: block; position: relative; }
+.card:not(.card--textonly) .card__media { border-radius: inherit; }
+
+/* Under the title only. A full-card scrim would darken the still evenly
+   and lose the thing the reader is looking at. */
+.card__veil {
+  position: absolute; inset: auto 0 0 0; height: 62%;
+  z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(12,22,24,0) 0%, rgba(12,22,24,0.30) 42%, rgba(12,22,24,0.80) 100%);
+  transition: opacity var(--t-base) var(--ease);
+}
+
+.card:not(.card--textonly) .card__body {
+  position: absolute; inset: auto 0 0 0; z-index: 2;
+  padding: var(--s-md);
+  background: none;
+}
+.card:not(.card--textonly) .card__title {
+  margin: 0;
+  color: rgba(255,255,255,0.88);
+  text-shadow: 0 1px 12px rgba(0,0,0,0.45);
+  transition: color var(--t-base) var(--ease);
+}
+.card:not(.card--textonly) .card__title .card__link { color: inherit; }
+
+/* Hover lifts the title to full white and deepens the scrim a little, so
+   the card answers the pointer without moving anything. */
+.card:not(.card--textonly):hover .card__title,
+.card:not(.card--textonly):focus-within .card__title { color: #fff; }
+.card:not(.card--textonly):hover .card__veil,
+.card:not(.card--textonly):focus-within .card__veil { opacity: 1.18; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card__veil, .card:not(.card--textonly) .card__title { transition: none; }
+}
+
+/* Cards past the first nine. Hidden with a class rather than left out of the
+   markup, so the whole list is in the HTML for search — and anyone without
+   JavaScript sees all of them instead of nine and a dead button. */
+.initiative-card.is-more { display: none; }
+
+.tracker__pillars  { grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 0; border-radius: 0 0 var(--r-lg) var(--r-lg); }
+
+@media (max-width: 900px) { .tracker__pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 460px) { .tracker, .tracker__pillars { grid-template-columns: minmax(0, 1fr); } }
+
+.stat {
+  background: var(--surface);
+  padding: var(--s-md) var(--s-sm);
+  transition: background-color var(--t-base) var(--ease);
+}
+.stat:hover { background: var(--accent-wash); }
+
+/* A lone stat in .tracker is the programme headline, so it is centred and
+   enlarged to sit above the pillars. Once the row holds several figures that
+   treatment is wrong: three oversized centred cells dwarf the five beneath
+   them and the block stops reading as one table. Multi-column rows therefore
+   keep the ordinary .stat sizing and differ from the pillars only in colour. */
+.tracker .stat { text-align: center; padding-block: var(--s-lg); }
+.tracker .stat__label { justify-content: center; }
+.tracker .stat__value { color: var(--accent); font-size: clamp(2rem, 3.6vw, 2.9rem); }
+
+.tracker--two .stat,
+.tracker--three .stat,
+.tracker--four .stat { text-align: left; padding-block: var(--s-md); }
+.tracker--two .stat__label,
+.tracker--three .stat__label,
+.tracker--four .stat__label { justify-content: flex-start; }
+.tracker--two .stat__value,
+.tracker--three .stat__value,
+.tracker--four .stat__value { font-size: clamp(1.5rem, 2.6vw, 2.05rem); }
+
+.stat__label {
+  display: flex; align-items: center; gap: var(--s-3xs);
+  font-size: var(--fs-label); font-weight: var(--w-heading);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: var(--s-xs);
+}
+.stat__label svg { width: 12px; height: 12px; color: var(--accent); }
+
+.stat__value {
+  font-size: clamp(1.5rem, 2.6vw, 2.05rem);
+  font-weight: var(--w-heading);
+  line-height: 1; letter-spacing: -0.03em;
+  color: var(--text);
+  /* Fixed-width digits stop the counter jittering as it ticks up */
+  font-variant-numeric: tabular-nums;
+  /* Keep the figure and its unit together — "12.4" and "M AED"
+     were breaking apart and reading as two separate values */
+  white-space: nowrap;
+}
+.stat__value .unit {
+  font-size: 0.4em; font-weight: var(--w-sub);
+  color: var(--accent); margin-left: 0.22em;
+  letter-spacing: 0; white-space: nowrap;
+}
+/* A symbol carries the meaning of the figure rather than labelling it — "50"
+   alone says nothing. Multi-word units like "M AED" can recede; a percent sign
+   set at the same size disappears against the number it belongs to. */
+.stat__value .unit--sym {
+  font-size: 0.62em; margin-left: 0.06em;
+  font-weight: var(--w-heading);
+}
+.stat__sub { margin-top: 2px; font-size: 0.78rem; line-height: 1.4; color: var(--text-muted); }
+
+.tracker-foot {
+  margin-top: var(--s-md);
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: var(--s-sm);
+}
+.tracker-stamp {
+  display: inline-flex; align-items: center; gap: var(--s-2xs);
+  font-size: var(--fs-sm); color: var(--text-muted);
+}
+.tracker-stamp svg { width: 14px; height: 14px; }
+
+/* ---------------------------------------------------------------
+   9 · NEWS CARDS
+   --------------------------------------------------------------- */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--s-md);
+}
+.news-grid--home { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+
+.card {
+  position: relative;
+  display: flex; flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease);
+}
+.card:hover {
+  border-color: var(--line-accent);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card__media {
+  position: relative; aspect-ratio: 16 / 9;
+  background: var(--surface-3); overflow: hidden;
+  /* Reserving the ratio is what keeps CLS at 0 */
+}
+.card__media img, .card__media video {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform var(--t-slow) var(--ease), opacity var(--t-base) var(--ease);
+}
+/* .card__poster is a <video> standing in for the still when the frame comes
+   straight from the file. It already picks up the sizing rule above, so it
+   only needs the same hover treatment as a real image. */
+.card:hover .card__media img,
+.card:hover .card__poster { transform: scale(1.05); }
+
+.card__clip {
+  position: absolute; inset: 0; opacity: 0;
+  transition: opacity var(--t-base) var(--ease);
+}
+.card.is-playing .card__clip { opacity: 1; }
+
+.card__badge {
+  position: absolute; top: var(--s-xs); left: var(--s-xs); z-index: 2;
+  display: inline-flex; align-items: center;
+  padding: 5px 11px; border-radius: var(--r-pill);
+  background: rgba(255, 253, 249, 0.94);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  font-size: var(--fs-label); font-weight: var(--w-heading);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+.card__play {
+  position: absolute; right: var(--s-xs); bottom: var(--s-xs); z-index: 2;
+  width: 42px; height: 42px;
+  display: grid; place-items: center; border-radius: 50%;
+  background: rgba(255, 253, 249, 0.94); color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--t-base) var(--ease);
+}
+.card:hover .card__play { transform: scale(1.1); }
+.card__play svg { width: 16px; height: 16px; margin-left: 2px; }
+
+.card__body { padding: var(--s-md); display: flex; flex-direction: column; flex: 1; }
+
+/* Text-only card: no media box, so the category badge comes out of its
+   absolute corner and sits in the body flow above the date. The glass
+   treatment goes with it — there is no image underneath to blur. */
+.card__badge--inline {
+  position: static; align-self: flex-start;
+  margin-bottom: var(--s-xs);
+  background: var(--accent-wash);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+/* Without a 16:9 image on top, the body needs a little more breathing room
+   so the card does not read as a cramped block of text. Declared after the
+   base rule as well as being more specific, so the override is obvious. */
+.card--textonly .card__body { padding: var(--s-lg) var(--s-md); }
+.card__meta {
+  display: flex; align-items: center; gap: var(--s-2xs);
+  font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: var(--s-2xs);
+}
+.card__meta .dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
+
+.card__title {
+  font-size: var(--fs-h3); font-weight: var(--w-heading);
+  letter-spacing: -0.015em; line-height: 1.35;
+  margin-bottom: var(--s-2xs);
+  transition: color var(--t-base) var(--ease);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card:hover .card__title { color: var(--accent); }
+
+.card__excerpt {
+  font-size: var(--fs-sm); color: var(--text-muted); font-weight: var(--w-body);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card__foot {
+  margin-top: auto; padding-top: var(--s-md);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: var(--fs-sm); color: var(--text-muted);
+}
+/* One tab stop per card, not three */
+.card__link::after { content: ''; position: absolute; inset: 0; z-index: 3; }
+
+.card--featured { grid-column: span 2; }
+.card--featured .card__media { aspect-ratio: 21 / 9; }
+.card--featured .card__title { font-size: var(--fs-h2); -webkit-line-clamp: 3; }
+@media (max-width: 720px) {
+  .card--featured { grid-column: span 1; }
+  .card--featured .card__media { aspect-ratio: 16 / 9; }
+}
+
+/* ---------------------------------------------------------------
+   10 · ANNOUNCEMENT PANEL
+   Was the "submit an idea" campaign block. This site is read-only,
+   so it now announces the competition rather than funnelling into it.
+   --------------------------------------------------------------- */
+.panel {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: clamp(var(--s-md), 3.2vw, var(--s-xl));
+  /* Sheen first, then the two colour washes, then the base. Declared together
+     so nothing downstream can replace one and silently drop the others. */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 40%),
+    radial-gradient(ellipse 70% 100% at 12% 0%,   rgba(158,243,238,0.52), transparent 60%),
+    radial-gradient(ellipse 60% 100% at 92% 100%, rgba(212,220,255,0.62), transparent 60%),
+    radial-gradient(ellipse 50% 70%  at 78% 8%,   rgba(107,145,195,0.16), transparent 66%),
+    var(--surface);
+  box-shadow: var(--shadow-md);
+}
+/* start, not center: the countdown is meant to line up with the prize table
+   opposite it, and centring floated it between the heading and the prizes. The
+   side column carries its own offset instead, so the two read as one row. */
+.panel__grid {
+  display: grid; gap: var(--s-lg);
+  grid-template-columns: 1.35fr 1fr; align-items: start;
+}
+/* Clears the panel heading and its intro paragraph, which is what sits above
+   the first prize row on the left. Scales with the type rather than being a
+   fixed pixel value that drifts at other widths. */
+.panel__side { padding-top: clamp(5.4rem, 9vw, 8.6rem); }
+@media (max-width: 880px) { .panel__side { padding-top: 0; } }
+@media (max-width: 880px) { .panel__grid { grid-template-columns: 1fr; } }
+
+/* Second panel when the winner and the countdown are both published */
+.panel--stacked { margin-top: var(--s-lg); }
+
+/* ---- Winner announcement ----------------------------------------
+   Same panel, different payload. The photo takes more of the width
+   than the countdown did, because a face is the point of this state. */
+.panel__grid--winner { grid-template-columns: 1.1fr 1fr; align-items: center; }
+@media (max-width: 880px) {
+  .panel__grid--winner { grid-template-columns: 1fr; }
+}
+
+.winner__name {
+  font-size: var(--fs-h2); font-weight: var(--w-heading);
+  letter-spacing: -0.025em; color: var(--text);
+  margin-top: var(--s-md); line-height: 1.15;
+}
+.winner__role {
+  font-size: var(--fs-body); color: var(--text-muted);
+  margin-top: var(--s-2xs);
+}
+/* The idea itself, set as the accent line — it is what actually won */
+.winner__idea {
+  margin-top: var(--s-sm);
+  font-size: var(--fs-body); font-weight: var(--w-sub);
+  color: var(--accent);
+}
+
+.winner__media {
+  border-radius: var(--r-lg); overflow: hidden;
+  background: var(--surface-3);
+  aspect-ratio: 4 / 3;
+  box-shadow: var(--shadow-md);
+}
+.winner__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Stand-in when no photo has been supplied yet */
+.winner__badge {
+  width: 100%; height: 100%;
+  display: grid; place-items: center;
+  background: linear-gradient(140deg, var(--aqua-wash), var(--lavender-wash));
+  color: var(--accent);
+}
+.winner__badge svg { width: 34%; height: auto; }
+
+.countdown { display: flex; gap: var(--s-xs); }
+.countdown__unit {
+  flex: 1; text-align: center;
+  padding: var(--s-md) var(--s-2xs);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.countdown__num {
+  display: block;
+  font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+  font-weight: var(--w-heading); line-height: 1;
+  color: var(--accent); font-variant-numeric: tabular-nums;
+}
+.countdown__lbl {
+  display: block; margin-top: var(--s-3xs);
+  font-size: var(--fs-label); letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------
+   11 · MARQUEE
+   --------------------------------------------------------------- */
+.marquee {
+  position: relative; overflow: hidden;
+  /* Room around the logos — without it they sit hard against the section
+     edges and the strip reads as cramped. */
+  padding-block: var(--s-md);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+/* The scrolling unit: original track + its clone, side by side. Built by
+   initMarquee. Kept separate from .marquee so the container can stay at
+   its parent's width and clip, rather than growing to fit its contents. */
+/* Same gap as inside a track. Without it the last logo of one track sits
+   flush against the first logo of its clone, and once per loop two brands
+   appear glued together. */
+/* No gap here. The spacing between the two halves comes from the track's own
+   trailing padding instead, so one half is exactly 50% of the wrapper and the
+   -50% loop lands the clone's first logo precisely where the original's was.
+   With a gap on the wrapper, 50% fell half a gap short and the strip jumped
+   once per cycle. */
+.marquee__inner { display: flex; width: max-content; gap: 0; }
+.marquee:hover .marquee__inner { animation-play-state: paused; }
+
+/* On a phone the strip is the same distance at the same speed through a much
+   narrower window, so it crawls. Halving the duration below 760px restores the
+   pace it has on a desktop; the perceived speed is distance over viewport, not
+   distance over time. */
+/* Trailing padding stands in for the gap between a track and its clone. */
+.marquee__track {
+  display: flex; align-items: center; gap: clamp(4rem, 7vw, 7rem);
+  width: max-content;
+  padding-right: clamp(4rem, 7vw, 7rem);
+}
+/* The animation lives on .marquee__inner, applied by initMarquee once the
+   clone exists. It was also declared here, so both elements scrolled at once
+   and their transforms compounded — the other half of the jump. */
+.marquee__inner { animation: marquee 42s linear infinite; }
+.marquee:hover .marquee__inner { animation-play-state: paused; }
+
+/* AFTER the shorthand above, not before it. Declared earlier, this was silently
+   undone: `animation: marquee 42s ...` is a shorthand, so it resets every
+   animation property including a duration set further up the file. That is why
+   the strip stayed at 42s on a phone.
+
+   Halved because the perceived speed is distance over viewport, not distance
+   over time — the same travel through a narrower window reads as a crawl. */
+@media (max-width: 760px) {
+  .marquee__inner { animation-duration: 20s; }
+  .marquee__track { gap: clamp(2rem, 9vw, 3.5rem); padding-right: clamp(2rem, 9vw, 3.5rem); }
+}
+
+/* Not interactive at all: no pointer, no text selection, no tap highlight. */
+.marquee__item { cursor: default; user-select: none; -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent; pointer-events: none; }
+
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+.marquee__item {
+  display: flex; align-items: center; gap: var(--s-2xs);
+  font-size: var(--fs-h3); font-weight: var(--w-sub);
+  color: var(--text-muted); white-space: nowrap;
+  transition: color var(--t-base) var(--ease);
+}
+.marquee__item:hover { color: var(--accent); }
+/* Logos are supplied at wildly different aspect ratios — a square crest
+   next to a wide wordmark. Fixing the height and capping the width keeps
+   the strip even without distorting any of them.
+
+   Opacity is 0.85, not the 0.55 used for dark monochrome marks: these are
+   full-colour logos in red, teal and green, and muting them that far read
+   as broken rather than restrained. */
+/* One shared box for every logo; each file carries its own transparent
+   padding, so how big a brand LOOKS is baked into the artwork rather than
+   into per-logo CSS. 54px keeps the baseline marks at their previous 44px
+   while leaving headroom for the stacked lockups to use the full height. */
+.marquee__item img {
+  height: clamp(56px, 5vw, 72px); width: auto; max-width: 260px; object-fit: contain;
+  opacity: 0.85; transition: opacity var(--t-base) var(--ease);
+}
+.marquee__item:hover img { opacity: 1; }
+
+.partner-types { display: flex; flex-wrap: wrap; gap: var(--s-2xs); justify-content: center; margin-bottom: var(--s-xl); }
+.chip {
+  padding: 8px 17px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font-size: var(--fs-sm); font-weight: 400;
+  color: var(--text-soft);
+  transition: all var(--t-base) var(--ease);
+}
+.chip:hover, .chip.is-active {
+  border-color: var(--accent); color: var(--accent); background: var(--accent-wash);
+}
+
+/* ---------------------------------------------------------------
+   12 · QUOTES
+   --------------------------------------------------------------- */
+/* Merged, not split. Same treatment as the hero: the portrait is the
+   background, a scrim fades it back, and the quote sits on top of it —
+   rather than two columns sitting side by side. */
+.quotes {
+  position: relative;
+  /* Tall enough for the portrait to read as a photograph rather than a
+     strip. The grid stacking below fixes the height to the longest quote,
+     so this is a floor, not a per-slide measurement. */
+  min-height: clamp(320px, 36vw, 420px);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: clamp(var(--s-lg), 6vw, var(--s-3xl));
+  /* Left inset pulled in after the shorthand, so the quote starts nearer the
+     edge. Every pixel the text moves left is a pixel the scrim no longer has
+     to cover, which is what lets the fade finish earlier and the face show. */
+  padding-left: clamp(var(--s-md), 3vw, var(--s-xl));
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background: var(--surface);
+}
+
+/* Stacked portraits, cross-faded */
+/* Full bleed and centred. An inset on this box made it narrower, which
+   forced `cover` to scale the photo up further to fill the width and read
+   as an extra zoom on top of the crop. Full width is the least-scaled
+   framing available, so the subject sits centred at its natural size. */
+.quotes__media { position: absolute; inset: 0; z-index: 0; }
+
+.quotes__portrait {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  /* `cover`, so the photo fills the card edge to edge. `contain` left the
+     image at its own aspect and painted the remainder in --surface, which is
+     the white band down the left that was reported — a 16:9 photo cannot fill
+     a much wider card without either cropping or letterboxing.
+
+     Cropping is the better trade here because of where it lands: anchored
+     right, everything cover discards comes off the LEFT, which is exactly the
+     half already hidden under the scrim. The subject is untouched and the
+     gap disappears. */
+  object-fit: cover;
+  /* Pinned right so the crop is taken from the left and the face stays clear
+     of the quote column. */
+  object-position: right center;
+  opacity: 0;
+  /* No scale. The crossfade used to ease from 1.05 to 1, which enlarged the
+     photo mid-transition on top of whatever the fit was already doing. */
+  transition: opacity 1000ms var(--ease);
+}
+.quotes__portrait.is-active { opacity: 1; }
+/* Shown when a quote has no portrait, so the card still looks deliberate
+   rather than empty. */
+.quotes__portrait--initials {
+  display: grid; place-items: center;
+  background: linear-gradient(140deg, var(--accent-wash), var(--lavender-wash));
+  color: var(--accent);
+  font-size: clamp(4rem, 12vw, 9rem); font-weight: var(--w-heading);
+}
+
+/* The fade. Strong on the left where the text sits, clearing to the
+   right so the portrait stays visible — the hero's treatment exactly. */
+.quotes__scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    /* Clear of the middle by design.
+       A head-and-shoulders photograph puts the face near the centre, so the
+       fade has to finish BEFORE the midline or it sits over the face — which
+       is exactly what it was doing. It now holds only across the text column
+       and is completely gone by 46%, leaving the whole centre and right of
+       the photograph untouched.
+       The text column was narrowed to 34ch to buy the room for this. */
+    linear-gradient(100deg,
+      /* Reaches further right than it used to, and more gently. A contained
+         photo begins around 49% of the card, so carrying the wash past that
+         point also softens the hard edge where it starts — the fade and the
+         photo's left boundary stop being two separate lines. */
+      rgba(255, 253, 249, 0.96)  0%,
+      rgba(255, 253, 249, 0.93) 30%,
+      rgba(255, 253, 249, 0.62) 40%,
+      rgba(255, 253, 249, 0.28) 48%,
+      rgba(255, 253, 249, 0.00) 56%),
+    /* Light foot so the card meets the page without a seam */
+    linear-gradient(180deg, transparent 78%, rgba(255, 253, 249, 0.45) 100%);
+}
+
+/* Short measure. The quote sets tall and narrow rather than running in
+   long lines across the photograph.
+
+   Grid, not absolute positioning. Every quote is placed in the SAME cell
+   (1 / 1), so all of them stay in flow and the row takes the height of the
+   longest — the card is then one fixed size for the whole carousel.
+
+   The previous approach took the active quote out of absolute positioning
+   and back into flow, which meant the card resized to each quote in turn
+   and the photograph jumped as you moved between them. */
+.quotes__body {
+  /* 34ch, not 38ch. Every character the text runs on is a character the
+     scrim has to cover, and the scrim has to finish before the face. */
+  position: relative; z-index: 2; max-width: 34ch;
+  display: grid; grid-template-columns: 1fr;
+}
+
+.quote {
+  grid-area: 1 / 1;
+  display: flex; flex-direction: column; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 700ms var(--ease), transform 700ms var(--ease), visibility 700ms;
+}
+.quote.is-active { opacity: 1; visibility: visible; transform: none; }
+
+.quote__mark {
+  font-size: 3.5rem; line-height: 0.5;
+  font-weight: var(--w-heading);
+  color: var(--aqua-fill); margin-bottom: var(--s-md);
+}
+.quote__text {
+  font-size: clamp(1rem, 1.7vw, 1.35rem);
+  font-weight: var(--w-body); line-height: 1.5;
+  color: var(--text); letter-spacing: -0.015em;
+}
+.quote__person { margin-top: var(--s-lg); }
+.quote__name { display: block; font-weight: var(--w-sub); font-size: var(--fs-body); color: var(--text); }
+.quote__role { font-size: var(--fs-sm); color: var(--text-muted); }
+
+/* Row 2 of .quotes__body — the stacked quotes hold row 1, so the dots sit
+   below the tallest of them rather than overlapping. */
+.quote-dots { grid-area: 2 / 1; position: relative; z-index: 2; display: flex; gap: var(--s-2xs); margin-top: var(--s-xl); }
+.quote-dot { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; }
+.quote-dot::before {
+  content: ''; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--line-strong);
+  transition: all var(--t-base) var(--ease);
+}
+.quote-dot[aria-selected="true"]::before { background: var(--accent); width: 24px; border-radius: var(--r-pill); }
+
+/* ---- Quotes on a phone -------------------------------------------
+   Placed AFTER every .quote rule above, not before them. Sitting earlier it was
+   silently overridden: .quotes__body, .quote and .quote-dots are declared later
+   at the same specificity, so the desktop values won and the phone layout never
+   applied — which is why the fade appeared unchanged.
+
+   Desktop overlays the quote on the photograph and fades the left third to
+   carry the text. A phone has no left third: the text spans the card, so the
+   wash had to cover everything and the portrait became a pale ghost behind the
+   words.
+
+   So below 820px the card stops being an overlay and becomes two stacked
+   blocks — photograph on top at full strength with no wash at all, quote
+   beneath it on plain surface. Nothing here applies above 820px.
+   ------------------------------------------------------------------ */
+@media (max-width: 820px) {
+  .quotes {
+    display: block;
+    min-height: 0;
+    padding: 0;
+  }
+
+  /* Out of the absolute layer and into flow, as the first block. */
+  .quotes__media {
+    position: relative; inset: auto;
+    width: 100%; aspect-ratio: 4 / 3;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+    overflow: hidden;
+  }
+  .quotes__portrait { object-fit: cover; object-position: center 22%; }
+
+  /* The whole point: nothing over the photograph. */
+  .quotes__scrim { display: none; }
+
+  /* Full width, own background, and padding so the text never sits against
+     the edge of the photograph above it. */
+  .quotes__body {
+    max-width: none;
+    padding: var(--s-lg) var(--s-md) var(--s-md);
+    background: var(--surface);
+  }
+  .quote-dots { margin-top: var(--s-lg); justify-content: center; }
+}
+
+/* ---------------------------------------------------------------
+   TRACKER HERO  (the /tracker page only)
+   Headline left, figures right. Only the tracker page does this; the
+   homepage keeps the stacked 1 + 5 rows, because there the figures
+   follow a section heading rather than a page title.
+
+   Everything below is a size reduction, not a different design: the
+   same .tracker and .tracker__pillars grids, scaled to fit half the
+   width. Six cells in that space need to be small, or they wrap and
+   the layout defeats its own purpose.
+   --------------------------------------------------------------- */
+.tracker-hero {
+  display: grid; gap: var(--s-lg);
+  align-items: center;
+  margin-bottom: var(--s-md);
+}
+@media (min-width: 900px) {
+  .tracker-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: var(--s-xl); }
+}
+.tracker-hero .section-title { font-size: clamp(1.4rem, 2.4vw, 1.95rem); }
+
+.tracker-kpis { display: flex; flex-direction: column; min-width: 0; }
+.tracker-kpis .tracker,
+.tracker-kpis .tracker__pillars { margin: 0; }
+
+/* Small enough to sit beside a headline. */
+.tracker-kpis .stat { padding: var(--s-xs) var(--s-2xs); }
+.tracker-kpis .stat__label { font-size: 0.58rem; letter-spacing: 0.08em; margin-bottom: 2px; gap: 3px; }
+.tracker-kpis .stat__label svg { width: 10px; height: 10px; }
+.tracker-kpis .stat__value { font-size: clamp(1.05rem, 1.5vw, 1.35rem); }
+.tracker-kpis .stat__value .unit { font-size: 0.42em; margin-left: 0.16em; }
+.tracker-kpis .stat__sub { font-size: 0.66rem; line-height: 1.3; margin-top: 1px; }
+
+/* The headline figure stays the largest, at this smaller scale. */
+.tracker-kpis .tracker .stat { padding-block: var(--s-sm); }
+.tracker-kpis .tracker .stat__value { font-size: clamp(1.5rem, 2.2vw, 1.95rem); }
+
+/* Five across is too fine at half width, so three — but five items in a
+   three-column grid leaves the sixth cell empty, and an empty cell inside a
+   bordered block reads as something failing to load. The last figure spans
+   the leftover column instead, which closes the row. */
+.tracker-kpis .tracker__pillars { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tracker-kpis .tracker__pillars .stat:last-child { grid-column: span 2; }
+
+@media (max-width: 600px) {
+  /* Two columns and five items leaves a hole in the same way — same fix. */
+  .tracker-kpis .tracker__pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tracker-kpis .tracker__pillars .stat:last-child { grid-column: span 2; }
+}
+
+/* The stamp now lives in the figures column, directly under the grid. */
+.tracker-kpis .tracker-foot {
+  margin-top: var(--s-xs);
+  justify-content: flex-start;
+}
+.tracker-kpis .tracker-stamp { font-size: 0.72rem; }
+
+/* Pulls a section up against the one above, where the two belong together. */
+.section--tight-top { padding-block-start: 0; }
+
+/* ---------------------------------------------------------------
+   PRIZES
+   Three tiers read as a table of figures, not prose — the amount is
+   what people scan for, so it sets large, in the accent, with tabular
+   figures so the three line up on the comma.
+   --------------------------------------------------------------- */
+.prizes {
+  list-style: none; margin: var(--s-sm) 0 var(--s-md);
+  display: flex; flex-direction: column; gap: var(--s-3xs);
+}
+.prize {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--s-sm);
+  padding: var(--s-2xs) var(--s-sm);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.prize:first-child { border-color: var(--line-accent); background: var(--accent-wash); }
+.prize__place {
+  font-size: var(--fs-sm); font-weight: var(--w-sub);
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-soft);
+}
+.prize__amount {
+  font-size: clamp(1.05rem, 1.7vw, 1.35rem); font-weight: var(--w-heading);
+  letter-spacing: -0.02em; color: var(--accent);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.prize__ccy {
+  font-size: 0.5em; font-weight: var(--w-sub);
+  margin-left: 0.35em; letter-spacing: 0.06em; color: var(--text-muted);
+}
+/* Entry count, in the campaign panel. Borrows the challenge counter's
+   proportions — a large figure against a small uppercase label — because it
+   does the same job: one number that says how much is already happening.
+   Rendered only when the snapshot carries a value, so it never shows a zero. */
+/* Boxed like a countdown unit, and directly beneath them. As a bare figure
+   beside a label it read as loose text under a tidy row of cards; the same
+   border and radius make it the last item in that group rather than a stray. */
+.entry-count {
+  display: block; text-align: center;
+  margin-top: var(--s-md);
+  padding: var(--s-md) var(--s-sm);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.entry-count__num {
+  display: block;
+  font-size: clamp(2rem, 3.4vw, 2.6rem); font-weight: var(--w-heading);
+  line-height: 1; letter-spacing: -0.03em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.entry-count__label {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 6px;
+  font-size: var(--fs-label); font-weight: var(--w-sub);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted); line-height: 1.4;
+}
+.entry-count__label svg { width: 16px; height: 16px; color: var(--accent); flex: none; }
+
+/* Italic sets the terms apart from the prize table above them — these are the
+   conditions attached to the money, not more of the offer. */
+.prize-note {
+  font-size: var(--fs-sm); color: var(--text-muted);
+  line-height: 1.6; margin-top: var(--s-xs); max-width: 60ch;
+  font-style: italic;
+}
+.prize-note strong { color: var(--text); font-weight: var(--w-sub); }
+.prize-close {
+  margin-top: var(--s-sm);
+  display: inline-flex; align-items: center;
+  padding: var(--s-2xs) var(--s-sm);
+  border-radius: var(--r-pill);
+  background: var(--aqua-wash); border: 1px solid var(--line);
+  font-size: var(--fs-sm); font-weight: var(--w-sub); color: var(--text);
+}
+
+/* ---------------------------------------------------------------
+   CHALLENGES
+   The seven problems the programme exists to solve. Numbered because
+   the set is fixed and people refer to them by number in workshops —
+   the numerals are an index, not decoration.
+
+   Auto-fit rather than a fixed column count: seven does not divide
+   evenly into three or four, and letting the grid choose avoids a
+   lone orphan on the last row at most widths.
+   --------------------------------------------------------------- */
+/* Hero: claim on the left, the count and the framing on the right, so the
+   page opens with a number rather than a wall of seven paragraphs. */
+.ch-hero { display: grid; gap: var(--s-xl); align-items: start; }
+@media (min-width: 900px) {
+  .ch-hero { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--s-3xl); }
+}
+.ch-hero__aside {
+  border-inline-start: 2px solid var(--line);
+  padding-inline-start: var(--s-lg);
+}
+@media (max-width: 899px) {
+  .ch-hero__aside { border-inline-start: 0; padding-inline-start: 0; }
+}
+.ch-count {
+  display: flex; align-items: baseline; gap: var(--s-sm);
+  margin-bottom: var(--s-md);
+}
+.ch-count__num {
+  font-size: clamp(3rem, 6vw, 4.5rem); font-weight: var(--w-heading);
+  line-height: 0.85; letter-spacing: -0.05em;
+  color: var(--accent-brand);
+  font-variant-numeric: tabular-nums;
+}
+.ch-count__label {
+  font-size: var(--fs-label); font-weight: var(--w-sub);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted); line-height: 1.5;
+}
+.ch-hero__note {
+  font-size: var(--fs-sm); color: var(--text-soft);
+  line-height: 1.7; max-width: 46ch;
+}
+
+/* The seven, as a numbered list rather than a card grid. The numbers are
+   referenced in campaign material ("challenge 4"), so the sequence carries
+   information and an <ol> is the honest element for it. */
+.ch-list {
+  list-style: none;
+  display: grid; gap: var(--s-md);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.ch-item {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  padding: var(--s-lg) var(--s-md) var(--s-md);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease);
+}
+.ch-item__n {
+  font-size: 2.4rem; font-weight: var(--w-heading);
+  line-height: 1; letter-spacing: -0.04em;
+  color: var(--accent-brand);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--s-sm);
+}
+.ch-item__name {
+  font-size: var(--fs-h3); font-weight: var(--w-sub);
+  line-height: 1.25; letter-spacing: -0.015em;
+  color: var(--text); margin-bottom: var(--s-xs);
+  text-wrap: balance;
+}
+.ch-item__desc {
+  font-size: var(--fs-sm); font-weight: var(--w-body);
+  color: var(--text-muted); line-height: 1.6;
+}
+
+.ch-cta { text-align: center; max-width: 60ch; margin-inline: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-item:hover { transform: none; }
+  .ch-item::before { transition: none; }
+}
+
+/* ---------------------------------------------------------------
+   13 · FEATURE PANEL (concierge / info)
+   --------------------------------------------------------------- */
+.feature {
+  position: relative; overflow: hidden; text-align: center;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: clamp(var(--s-lg), 5vw, var(--s-3xl));
+  background:
+    radial-gradient(ellipse 90% 120% at 100% 0%, rgba(212,220,255,0.6), transparent 58%),
+    radial-gradient(ellipse 80% 100% at 0% 100%, rgba(158,243,238,0.35), transparent 58%),
+    var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+/* ---------------------------------------------------------------
+   13b · CHAMPIONS BANNER
+   The homepage no longer lists Champions — it carries a single image
+   that introduces them and sends you to the full page. One photograph
+   of people doing the work says more than three cards of summaries.
+   --------------------------------------------------------------- */
+.champ-banner {
+  position: relative; overflow: hidden;
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-md);
+  min-height: clamp(360px, 44vw, 520px);
+  display: grid; align-items: end;
+  isolation: isolate;
+}
+.champ-banner__img { position: absolute; inset: 0; z-index: 0; }
+.champ-banner__img img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  /* Faces sit in the upper half, so the crop is biased that way rather than
+     centred — a centred cover crop takes the top of the frame first. */
+  object-position: center 32%;
+  /* Its own drift, not the hero's. heroDrift ends at scale 1.16 and lifts the
+     frame 1.5%, which is fine over footage with nothing important near the top
+     edge and wrong over a row of people — it was cutting the tallest head. */
+  animation: champDrift 34s var(--ease) infinite alternate;
+}
+@keyframes champDrift {
+  from { transform: scale(1.02) translate3d(0, 0, 0); }
+  to   { transform: scale(1.07) translate3d(0, 0, 0); }
+}
+/* Dark wash so the type on top clears contrast whatever the photo does.
+   Weighted to the bottom, where the copy sits. */
+.champ-banner__scrim {
+  position: absolute; inset: 0; z-index: 1;
+  /* Lightened: the photograph was carrying more wash than the type needs. The
+     vertical pass still deepens toward the bottom, where the copy sits, and the
+     horizontal one keeps the left edge legible — both just further back, so the
+     faces read as a photograph rather than a darkened backdrop. */
+  background:
+    linear-gradient(180deg, rgba(18,32,35,0.02) 0%, rgba(18,32,35,0.22) 45%, rgba(18,32,35,0.62) 100%),
+    linear-gradient(90deg, rgba(18,32,35,0.34) 0%, transparent 58%);
+}
+.champ-banner__body {
+  position: relative; z-index: 2;
+  padding: clamp(var(--s-lg), 4vw, var(--s-2xl));
+  max-width: 60rem;
+}
+/* On the photograph the palette inverts — the page tokens are tuned for
+   dark-on-vanilla and would vanish here. */
+.champ-banner__body .eyebrow { color: #9ef3ee; }
+.champ-banner__body .section-title { color: #fff; max-width: 20ch; }
+.champ-banner__body .section-intro { color: rgba(255,255,255,0.82); max-width: 48ch; }
+.champ-banner__actions { margin-top: clamp(var(--s-md), 3vw, var(--s-lg)); }
+/* The banner is the only light-on-dark surface in the page, so the ghost
+   button needs its own treatment rather than the page-wide one. */
+.champ-banner .btn--ghost {
+  color: #fff; border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.08);
+}
+.champ-banner .btn--ghost:hover {
+  background: rgba(255,255,255,0.18); border-color: #fff;
+}
+
+@media (max-width: 640px) {
+  .champ-banner { min-height: 320px; }
+}
+
+/* ---------------------------------------------------------------
+   14 · ARTICLE
+   --------------------------------------------------------------- */
+.article__head { padding-block: calc(64px + var(--s-2xl)) var(--s-xl); }
+.article__title {
+  font-size: var(--fs-display); font-weight: var(--w-heading);
+  letter-spacing: -0.03em; max-width: 22ch;
+}
+.article__meta {
+  margin-top: var(--s-md);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-xs);
+  font-size: var(--fs-sm); color: var(--text-muted);
+}
+.article__hero {
+  aspect-ratio: 21 / 9; border-radius: var(--r-lg); overflow: hidden;
+  background: var(--surface-3); margin-bottom: var(--s-2xl);
+  box-shadow: var(--shadow-md);
+}
+/* Full-length videos are SharePoint/Stream iframes — they need an
+   explicit ratio box or they collapse to zero height. */
+.video-embed {
+  position: relative; aspect-ratio: 16 / 9;
+  border-radius: var(--r-lg); overflow: hidden;
+  background: var(--ink); border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+}
+.video-embed iframe,
+.video-embed video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+/* A self-hosted file may be square or portrait, not 16/9. contain letterboxes
+   it against the dark ground rather than stretching faces sideways. */
+.video-embed video { object-fit: contain; background: var(--ink); }
+
+.prose { max-width: var(--maxw-prose); font-size: 1.0625rem; color: var(--text-soft); font-weight: var(--w-body); }
+.prose > * + * { margin-top: var(--s-md); }
+.prose h2 { font-size: var(--fs-h2); font-weight: var(--w-heading); color: var(--text); margin-top: var(--s-xl); }
+.prose h3 { font-size: var(--fs-h3); font-weight: var(--w-sub);     color: var(--text); margin-top: var(--s-lg); }
+.prose a  { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.prose img { border-radius: var(--r-md); margin-block: var(--s-lg); box-shadow: var(--shadow-md); }
+.prose ul, .prose ol { padding-left: 1.3em; }
+.prose li + li { margin-top: var(--s-2xs); }
+.prose blockquote {
+  border-left: 3px solid var(--aqua-fill);
+  padding-left: var(--s-md);
+  font-size: var(--fs-lead); font-weight: var(--w-sub);
+  color: var(--text);
+}
+
+/* ---------------------------------------------------------------
+   15 · PEOPLE GRID (Labs Champions)
+   --------------------------------------------------------------- */
+/* Champion cards carry more now — a Champion can be one person or a
+   whole team, plus their initiative and what they delivered — so the
+   minimum is 300px rather than 220px. Below that the role and
+   initiative lines started wrapping to three lines each. */
+.people {
+  display: grid; gap: var(--s-lg);
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+/* Partner cards are larger than champion cards and carry more air around the
+   artwork. A logo needs room to read as a mark rather than a picture pressed
+   into a frame — the padding is on the media box so it applies whatever the
+   logo's own proportions are. */
+.people--partners .person__photo { padding: var(--s-md); }
+.people--partners .person__body { padding: var(--s-md) var(--s-lg) var(--s-lg); }
+
+/* A group photo is landscape; a portrait is square. 4:3 suits both
+   without cropping faces out of a group shot. */
+.people .person__photo { aspect-ratio: 4 / 3; }
+.person__body { padding: var(--s-lg) var(--s-md) var(--s-md); }
+.person__name { font-size: var(--fs-h3); }
+
+/* Members of a team Champion */
+.person__members {
+  display: flex; flex-wrap: wrap; gap: var(--s-3xs);
+  margin-top: var(--s-2xs);
+}
+.person__member {
+  font-size: var(--fs-label); font-weight: var(--w-sub);
+  padding: 3px 9px; border-radius: var(--r-pill);
+  background: var(--surface-2); color: var(--text-soft);
+}
+.person__count {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: var(--fs-label); font-weight: var(--w-sub);
+  color: var(--accent); margin-top: var(--s-2xs);
+}
+.person__count svg { width: 12px; height: 12px; }
+.person {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);
+}
+.person:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+/* A card with nothing to click must not behave like a button.
+   Partner and Champion cards carry no link, but the lift, the tilt and
+   the image zoom all read as "this goes somewhere" — so the card looks
+   broken when clicking it does nothing. Neutralise every hover signal
+   for cards that contain no anchor. */
+.person:not(:has(a)) { cursor: default; }
+.person:not(:has(a)):hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
+  border-color: var(--line);
+}
+.person:not(:has(a)):hover .person__photo img { transform: none; }
+/* position:relative is load-bearing — the initials fallback inside is
+   absolutely positioned. Without it that element escapes to the nearest
+   positioned ancestor and paints over the whole section. */
+.person__photo {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+/* Initials shown when a champion has no photo yet */
+.person__initials {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  background: linear-gradient(140deg, var(--accent-wash), var(--lavender-wash));
+  color: var(--accent);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: var(--w-heading);
+  letter-spacing: 0.02em;
+}
+.person__photo img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--t-slow) var(--ease); }
+.person:hover .person__photo img { transform: scale(1.05); }
+.person__body { padding: var(--s-md); }
+.person__name { font-size: var(--fs-h3); font-weight: var(--w-heading); }
+.person__role { font-size: var(--fs-sm); color: var(--text-muted); margin-top: 2px; }
+.person__bu {
+  display: inline-block; margin-top: var(--s-2xs);
+  padding: 3px 10px; border-radius: var(--r-pill);
+  background: var(--accent-wash); color: var(--accent);
+  font-size: var(--fs-label); font-weight: var(--w-sub);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------
+   15b · BACK LINK
+   Sits in its own row above the page header. Styled as a button
+   rather than a text link, and given a full --s-xl of clearance,
+   because as a bare link directly above the eyebrow it read as part
+   of the title block instead of as a way out of the page.
+   --------------------------------------------------------------- */
+/* Wrapper used only by the preview's injector. The spacing lives on the
+   link itself so it applies in production too, where the anchor sits bare
+   in the markup with no wrapper around it. */
+.page-back-row { }
+
+.page-back {
+  display: inline-flex; align-items: center; gap: var(--s-2xs);
+  /* Sits directly above a page title, so it needs real separation or it
+     reads as part of the heading block rather than as navigation. */
+  margin-bottom: var(--s-2xl);
+  min-height: 44px;
+  padding-inline: var(--s-md) var(--s-md);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--fs-sm); font-weight: var(--w-sub);
+  color: var(--text-soft);
+  transition: border-color var(--t-base) var(--ease),
+              color var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease);
+}
+.page-back:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateX(-3px);
+  box-shadow: var(--shadow-md);
+}
+.page-back:active { transform: translateX(-3px) scale(0.97); }
+.page-back svg { width: 15px; height: 15px; transition: transform var(--t-base) var(--ease); }
+.page-back:hover svg { transform: translateX(-3px); }
+
+/* ---------------------------------------------------------------
+   16 · FILTER BAR
+   --------------------------------------------------------------- */
+.filters {
+  display: flex; flex-wrap: wrap; gap: var(--s-2xs);
+  margin-bottom: var(--s-xl);
+}
+.filter {
+  min-height: 44px; padding: 0 var(--s-md);
+  display: inline-flex; align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font-size: var(--fs-sm); font-weight: 400;
+  color: var(--text-soft);
+  transition: all var(--t-base) var(--ease);
+}
+.filter:hover { border-color: var(--accent); color: var(--accent); }
+.filter[aria-pressed="true"] {
+  background: var(--ink); border-color: var(--ink);
+  color: #fff; font-weight: var(--w-sub);
+}
+
+/* ---------------------------------------------------------------
+   17 · FOOTER
+   --------------------------------------------------------------- */
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding-block: var(--s-2xl) var(--s-lg);
+  background: var(--surface-2);
+}
+.footer__grid {
+  display: grid; gap: var(--s-xl);
+  grid-template-columns: 1.4fr repeat(2, 1fr);
+  margin-bottom: var(--s-2xl);
+}
+@media (max-width: 720px) { .footer__grid { grid-template-columns: 1fr; } }
+.footer__title {
+  font-size: var(--fs-label); font-weight: var(--w-heading);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: var(--s-md);
+}
+.footer__list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: var(--s-2xs); }
+.footer__list a {
+  font-size: var(--fs-sm); color: var(--text-soft);
+  display: inline-block; padding-block: 6px;
+  transition: color var(--t-fast) var(--ease);
+}
+.footer__list a:hover { color: var(--accent); }
+.footer__bottom {
+  padding-top: var(--s-lg); border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: var(--s-sm); justify-content: space-between;
+  font-size: var(--fs-sm); color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------
+   18 · EMPTY / SKELETON
+   --------------------------------------------------------------- */
+.empty {
+  text-align: center; padding: var(--s-3xl) var(--s-md);
+  border: 1px dashed var(--line-strong); border-radius: var(--r-lg);
+  background: var(--surface);
+}
+.empty__icon {
+  width: 54px; height: 54px; margin: 0 auto var(--s-md);
+  display: grid; place-items: center; border-radius: var(--r-md);
+  background: var(--surface-2); color: var(--text-muted);
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: var(--r-sm);
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ---------------------------------------------------------------
+   18b · MY IDEAS
+   One card per submission, with the pipeline drawn as a stepper. The
+   seven pipeline stages are a sequence, so a stepper is honest here in a
+   way numbered decoration elsewhere would not be.
+   --------------------------------------------------------------- */
+/* Title and the submit action share a row, dropping to stacked when the
+   headline needs the full width. */
+.myideas__head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: var(--s-md);
+  margin-bottom: var(--s-xl);
+}
+
+/* Five counts. Not cards — a bordered strip reads as one summary rather than
+   five competing tiles, which is what a card grid would have done. */
+.summary {
+  display: grid; gap: 1px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: var(--s-xl);
+}
+.summary__stat { background: var(--surface); padding: var(--s-md) var(--s-md) var(--s-sm); }
+.summary__stat dt {
+  font-size: var(--fs-label); font-weight: var(--w-sub);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: var(--s-3xs);
+}
+.summary__stat dd {
+  font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: var(--w-heading);
+  line-height: 1; letter-spacing: -0.03em; color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+/* The one count that means something is moving gets the accent; the rest are
+   just totals. */
+.summary__stat.is-live dd { color: var(--accent); }
+
+/* What the status word actually means for the reader. A label alone never
+   says that. */
+.idea-card__meaning {
+  font-size: var(--fs-sm); color: var(--text-soft);
+  line-height: 1.6; margin-top: var(--s-2xs); max-width: 62ch;
+}
+
+/* ---- Latest reviewer note ---- */
+.idea-note {
+  margin-top: var(--s-md);
+  padding: var(--s-sm) var(--s-md);
+  border-inline-start: 2px solid var(--line-accent);
+  background: var(--accent-wash);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
+.idea-note__who {
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--s-2xs);
+  margin-bottom: var(--s-2xs);
+}
+.idea-note__avatar {
+  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent); color: #fff;
+  font-size: 0.62rem; font-weight: var(--w-sub); letter-spacing: 0.04em;
+}
+.idea-note__name { font-size: var(--fs-sm); font-weight: var(--w-sub); color: var(--text); }
+.idea-note__when { font-size: var(--fs-sm); color: var(--text-muted); }
+.idea-note__body { font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.65; }
+
+/* ---- Activity log ----
+   A rail down the left with a marker per entry. Newest first, so the marker
+   that matters is the one at the top; it is filled where the rest are hollow
+   rather than being a different size, which would make the list look ragged. */
+.idea-log { list-style: none; margin-top: var(--s-md); }
+.idea-log__item {
+  position: relative;
+  padding-inline-start: var(--s-lg);
+  padding-block: 0 var(--s-md);
+}
+.idea-log__item:last-child { padding-bottom: 0; }
+/* The rail. Stops at the last marker instead of running to the bottom edge. */
+.idea-log__item::before {
+  content: ''; position: absolute;
+  inset-inline-start: 4px; top: 14px; bottom: 0;
+  width: 1px; background: var(--line-strong);
+}
+.idea-log__item:last-child::before { display: none; }
+.idea-log__item::after {
+  content: ''; position: absolute;
+  inset-inline-start: 0; top: 6px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--surface); border: 1.5px solid var(--line-strong);
+}
+.idea-log__item.is-latest::after { background: var(--accent); border-color: var(--accent); }
+
+.idea-log__when {
+  font-size: var(--fs-label); font-weight: var(--w-sub);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 2px;
+}
+.idea-log__what { font-size: var(--fs-sm); color: var(--text); }
+.idea-log__what b { font-weight: var(--w-sub); }
+.idea-log__note {
+  font-size: var(--fs-sm); color: var(--text-muted);
+  line-height: 1.65; margin-top: var(--s-3xs); max-width: 70ch;
+}
+
+/* Two disclosures now sit next to each other; give them one shared divider
+   rather than two stacked borders. */
+.idea-detail + .idea-detail { border-top: 0; margin-top: 0; }
+.myideas__count strong { color: var(--text); font-weight: var(--w-sub); }
+
+.myideas { display: grid; gap: var(--s-md); }
+
+.idea-card {
+  padding: var(--s-lg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease);
+}
+.idea-card:hover {
+  border-color: var(--line-accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+.idea-card__head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--s-md); flex-wrap: wrap;
+}
+.idea-card__name {
+  font-size: var(--fs-h3); font-weight: var(--w-sub);
+  line-height: 1.25; letter-spacing: -0.015em;
+  color: var(--text); text-wrap: balance;
+}
+.idea-card__meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-sm);
+  margin-top: var(--s-3xs);
+  font-size: var(--fs-sm); color: var(--text-muted);
+}
+.idea-card__ref {
+  font-variant-numeric: tabular-nums; letter-spacing: 0.04em;
+  color: var(--text-soft); font-weight: var(--w-sub);
+}
+
+/* Three states, three colours. A closed idea must not wear the same badge
+   as one still moving, and a finished one must not wear the same badge as
+   one that stopped. */
+.idea-status {
+  flex: none;
+  display: inline-flex; align-items: center;
+  padding: var(--s-3xs) var(--s-sm);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-label); font-weight: var(--w-sub);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.idea-status.is-open   { background: var(--accent-wash);   color: var(--accent);      border-color: var(--line-accent); }
+.idea-status.is-done   { background: var(--aqua-wash);     color: #12656b;            border-color: rgba(18,101,107,.24); }
+.idea-status.is-closed { background: var(--surface-2, #f4f0e8); color: var(--text-muted); border-color: var(--line-strong); }
+
+/* ---- Pipeline stepper ---- */
+.stepper {
+  list-style: none;
+  display: flex; margin-top: var(--s-lg);
+}
+.stepper__step {
+  flex: 1 1 0; min-width: 0; position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  gap: var(--s-2xs); text-align: center;
+}
+/* Connector runs from the previous dot's centre to this one, so it is drawn
+   on the later step and suppressed on the first. */
+.stepper__step::before {
+  content: ''; position: absolute; top: 5px; left: -50%;
+  width: 100%; height: 2px; background: var(--line);
+  transition: background var(--t-base) var(--ease);
+}
+.stepper__step:first-child::before { display: none; }
+.stepper__step.is-done::before,
+.stepper__step.is-now::before { background: var(--accent-brand); }
+
+.stepper__dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--line-strong); position: relative; z-index: 1;
+  transition: background var(--t-base) var(--ease);
+}
+.stepper__step.is-done .stepper__dot { background: var(--accent-brand); }
+.stepper__step.is-now  .stepper__dot { background: var(--accent); animation: ideaPulse 2.6s ease-in-out infinite; }
+
+/* A slow breath on the current stage only — it marks where the reader
+   should look without the page appearing to load something. */
+@keyframes ideaPulse {
+  0%, 100% { box-shadow: 0 0 0 4px var(--accent-wash); }
+  50%      { box-shadow: 0 0 0 8px var(--accent-wash); }
+}
+
+.stepper__label {
+  font-size: 0.68rem; line-height: 1.3; letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+.stepper__step.is-done .stepper__label { color: var(--text-soft); }
+.stepper__step.is-now  .stepper__label { color: var(--accent); font-weight: var(--w-sub); }
+
+/* Seven labels will not sit side by side on a phone. Stacked, and the
+   connectors go: a vertical rail between rows reads as decoration. */
+@media (max-width: 720px) {
+  .stepper { flex-direction: column; align-items: flex-start; gap: var(--s-2xs); }
+  .stepper__step { flex-direction: row; align-items: center; gap: var(--s-sm); width: 100%; text-align: left; }
+  .stepper__step::before { display: none; }
+  .stepper__label { font-size: var(--fs-sm); }
+}
+
+.idea-card__closed {
+  margin-top: var(--s-md); padding-top: var(--s-md);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-sm); color: var(--text-muted);
+}
+/* ---- Full submission, collapsed ----
+   Native <details>, so it opens with no JS and stays open when the reader
+   uses find-in-page. The chevron rotates rather than swapping glyphs. */
+.idea-detail { margin-top: var(--s-md); border-top: 1px solid var(--line); }
+.idea-detail__toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-sm); cursor: pointer; list-style: none;
+  padding-top: var(--s-md);
+  font-size: var(--fs-sm); font-weight: var(--w-sub); color: var(--accent);
+  transition: color var(--t-fast) var(--ease);
+}
+.idea-detail__toggle::-webkit-details-marker { display: none; }
+.idea-detail__toggle:hover { color: var(--accent-hover); }
+.idea-detail__toggle svg {
+  width: 16px; height: 16px; flex: none;
+  transition: transform var(--t-base) var(--ease);
+}
+.idea-detail[open] .idea-detail__toggle svg { transform: rotate(180deg); }
+
+.idea-detail__body { padding-top: var(--s-md); }
+.idea-detail__group {
+  font-size: var(--fs-label); font-weight: var(--w-sub);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted);
+  margin: var(--s-md) 0 var(--s-xs);
+}
+.idea-detail__group:first-child { margin-top: 0; }
+
+/* Label left, answer right on a wide screen; stacked on a narrow one, where
+   a two-column grid would squeeze both halves into unreadable columns. */
+.idea-detail__list { display: grid; gap: var(--s-xs) var(--s-md); font-size: var(--fs-sm); }
+@media (min-width: 620px) {
+  .idea-detail__list { grid-template-columns: minmax(0, 12rem) minmax(0, 1fr); }
+  .idea-detail__list dt { grid-column: 1; }
+  .idea-detail__list dd { grid-column: 2; }
+}
+.idea-detail__list dt { color: var(--text-muted); }
+.idea-detail__list dd { color: var(--text-soft); line-height: 1.65; overflow-wrap: anywhere; }
+
+.idea-card__note {
+  margin-top: var(--s-md);
+  padding: var(--s-sm) var(--s-md);
+  border-inline-start: 2px solid var(--line-accent);
+  background: var(--accent-wash);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.6;
+}
+
+
+/* ---------------------------------------------------------------
+   CARD HOVER — no movement
+   Lifting a card translates the whole subtree, and text inside a
+   transformed element renders off the pixel grid on most browsers. The
+   accent rail below animates a 3px bar instead, so the type never moves.
+   --------------------------------------------------------------- */
+.card, .pillar, .person, .idea-card, .ch-item, .initiative-card, .stat {
+  position: relative;
+}
+.card::after, .pillar::after, .person::after,
+.idea-card::after, .ch-item::after, .initiative-card::after {
+  content: '';
+  position: absolute; inset-block: 0; inset-inline-start: 0;
+  width: 3px; border-start-start-radius: inherit; border-end-start-radius: inherit;
+  background: linear-gradient(to bottom, var(--accent-brand), var(--aqua-fill));
+  transform: scaleY(0); transform-origin: top;
+  transition: transform 420ms var(--ease);
+  pointer-events: none;
+}
+.card:hover::after, .pillar:hover::after, .person:hover::after,
+.idea-card:hover::after, .ch-item:hover::after, .initiative-card:hover::after {
+  transform: scaleY(1);
+}
+.card:hover, .pillar:hover, .person:hover,
+.idea-card:hover, .ch-item:hover, .initiative-card:hover, .stat:hover {
+  transform: none !important;
+  border-color: var(--line-accent);
+  box-shadow: var(--shadow-md);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card::after, .pillar::after, .person::after,
+  .idea-card::after, .ch-item::after, .initiative-card::after { transition: none; }
+}
+
+/* ---------------------------------------------------------------
+   HEADER NAV — sizing and placement
+   The links sat hard against the wordmark. Pushing the list with an auto
+   margin rather than relying on space-between keeps them right-aligned
+   whether or not the mobile toggle is in the flow.
+   --------------------------------------------------------------- */
+/* Six items now, and they did not fit. The row is inside a 1240px .wrap
+   while body sets overflow-x: hidden, so anything past the edge is clipped
+   rather than scrollable — the last link simply disappeared. Before that it
+   wrapped onto two lines instead, which is what looked broken.
+
+   So: tighten everything until six fit on one line, then relax again on
+   screens wide enough to afford it. */
+@media (min-width: 901px) {
+  .nav__logo { margin-inline-end: var(--s-md); }
+  .nav__logo img { height: 24px; }
+  .nav__links { margin-inline-start: auto; gap: 2px; min-width: 0; }
+  .nav__link { white-space: nowrap; padding-inline: var(--s-xs); font-size: 0.85rem; }
+  .nav__link::after { left: var(--s-xs); right: var(--s-xs); }
+}
+/* Sign in reads as an action, not another destination — it is the only nav
+   item that changes state rather than moving you somewhere. */
+.nav__link--signin { color: var(--accent); font-weight: var(--w-sub); }
+
+@media (min-width: 1280px) {
+  .nav__logo { margin-inline-end: var(--s-xl); }
+  .nav__logo img { height: 28px; }
+  .nav__links { gap: var(--s-3xs); }
+  .nav__link { padding-inline: var(--s-sm); font-size: var(--fs-sm); }
+  .nav__link::after { left: var(--s-sm); right: var(--s-sm); }
+}
+/* ---------------------------------------------------------------
+   GLOSS
+   The palette was flat fills — every surface one solid colour, which
+   reads as matt paper. This adds sheen without changing a single hue:
+   a light falling from the top of each surface, and a hairline highlight
+   along its upper edge.
+
+   Done with background-image and an inset shadow rather than by editing
+   the tokens, so the colour system is untouched and the whole effect can
+   be removed by deleting this block.
+   --------------------------------------------------------------- */
+
+/* The page itself lifts slightly toward the top of the viewport. Fixed
+   attachment so it stays put while content scrolls past — a gradient that
+   scrolls with the page re-reads as a band halfway down. */
+body {
+  background-image: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0) 55%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* Every raised surface gets the same light. Kept under 50% height so it
+   reads as a sheen rather than a two-tone card. */
+/* .panel is deliberately absent. It sets its own background-image — two radial
+   washes that give the campaign card its colour — and a second background-image
+   here replaces them outright rather than layering, which flattened it to plain
+   surface. The panel carries its own sheen in its own rule instead. */
+.card, .pillar, .person, .idea-card, .ch-item, .initiative-card,
+.stat, .quotes, .summary__stat, .idea-note, .prize {
+  background-image: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(255, 255, 255, 0) 44%);
+}
+
+/* A hairline of light along the top edge — the detail that separates
+   "glossy" from "gradient". Composed with the existing shadow rather than
+   replacing it, so hover states still work. */
+.card, .pillar, .person, .idea-card, .ch-item, .initiative-card, .quotes {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), var(--shadow-sm);
+}
+.card:hover, .pillar:hover, .person:hover,
+.idea-card:hover, .ch-item:hover, .initiative-card:hover {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), var(--shadow-md);
+}
+
+/* The tinted band picks up the same light so it does not read as the one
+   flat area on an otherwise lit page. */
+.section--tint {
+  background-image: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0) 40%);
+}
+
+/* ---------------------------------------------------------------
+   19 · SCROLL REVEAL
+   Entrance only, fires once. Heavy on entry, still afterwards —
+   that is what reads as rich rather than restless.
+
+   Scoped to .js, which innovo-labs.js sets on <html> as its first
+   statement. Unscoped, a CSP block or a script error would leave
+   every element below the hero stuck at opacity:0 — a blank page
+   at full height. Scoped, the worst case is simply no animation.
+   --------------------------------------------------------------- */
+.js [data-reveal] {
+  opacity: 0; transform: translateY(26px);
+  transition: opacity var(--t-reveal) var(--ease),
+              transform var(--t-reveal) var(--ease);
+  transition-delay: calc(var(--i, 0) * 120ms);
+}
+.js [data-reveal="left"]  { transform: translateX(-26px); }
+.js [data-reveal="right"] { transform: translateX(26px); }
+.js [data-reveal="scale"] { transform: scale(0.96); }
+.js [data-reveal="fade"]  { transform: none; }
+.js [data-reveal].is-visible { opacity: 1; transform: none; }
+
+/* ---------------------------------------------------------------
+   19b · EXTENDED MOTION
+
+   Everything here animates transform / opacity / clip-path only, so it
+   runs on the compositor and never triggers layout. All of it is either
+   entrance (fires once) or pointer-driven (stops when you stop), with
+   one exception noted below — which keeps the page rich without ever
+   becoming restless.
+   --------------------------------------------------------------- */
+
+/* Scroll progress — the only new element that is always moving, and it
+   moves only because the reader is moving. */
+.scroll-progress {
+  position: fixed; inset-inline: 0; top: 0; height: 2px; z-index: 150;
+  background: linear-gradient(90deg, var(--accent-brand), var(--accent));
+  transform: scaleX(0); transform-origin: left;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Section titles rise word by word, reusing the hero's mask technique.
+   Triggered by the reveal observer rather than on load, so it happens
+   as each section arrives. */
+.js .section-title .word__i { transform: translateY(105%); }
+.js [data-reveal].is-visible .section-title .word__i,
+.js .section-title.is-visible .word__i { transform: translateY(0); }
+
+/* Card artwork wipes up as the card enters, instead of just fading.
+   clip-path is composited, so this is free. */
+.js [data-reveal] .card__media img,
+.js [data-reveal].card .card__media img {
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 1s var(--ease), transform var(--t-slow) var(--ease);
+}
+.js [data-reveal].is-visible .card__media img,
+.js [data-reveal].card.is-visible .card__media img { clip-path: inset(0 0 0 0); }
+
+/* Pointer-driven card tilt.
+
+   Scoped to :hover ONLY, deliberately. A base `transform` on .card would
+   be overridden by `.js [data-reveal].is-visible { transform: none }`
+   (higher specificity) and silently do nothing — and forcing it to win
+   would clobber the entrance slide instead. Confining it to hover means
+   the reveal owns the resting transform and the tilt owns the hovered
+   one, with no collision.
+
+   `.js …:hover` is (0,3,0) and declared after the reveal rules, so it
+   also beats the plain `.card:hover` lift further up the file. */
+/* Tilt is a "this is interactive" signal, so it is withheld from cards
+   that contain no link — see the :not(:has(a)) rule in §15. */
+.js .person:not(:has(a)):hover { transform: none; }
+
+.js .card:hover,
+.js .person:has(a):hover,
+.js .pillar:hover {
+  transform: perspective(900px)
+             rotateX(var(--rx, 0deg))
+             rotateY(var(--ry, 0deg))
+             translateY(var(--ty, -5px))
+             scale(var(--sc, 1.012));
+}
+
+/* Magnetic buttons — the control drifts a few pixels toward the cursor,
+   which makes it feel like it wants to be pressed. Capped at 6px; more
+   than that and it starts dodging the pointer. */
+.btn, .page-back { --mx: 0px; --my: 0px; }
+.btn.is-magnetic, .page-back.is-magnetic {
+  transform: translate(var(--mx), var(--my)) translateY(-2px);
+}
+
+/* Nav underline draws in from the left */
+.nav__link { position: relative; }
+.nav__link::after {
+  content: ''; position: absolute;
+  left: var(--s-sm); right: var(--s-sm); bottom: 8px; height: 1.5px;
+  background: currentColor; border-radius: 2px;
+  transform: scaleX(0); transform-origin: right;
+  transition: transform var(--t-base) var(--ease);
+}
+.nav__link:hover::after { transform: scaleX(1); transform-origin: left; }
+.nav__link[aria-current="page"]::after { transform: scaleX(1); }
+
+/* Ambient glow drift. The one persistent loop added here — 30s, blurred
+   by 100px, sub-pixel apparent speed. It reads as light shifting in the
+   room, not as something moving on the page. */
+.glow { animation: glowDrift 30s var(--ease) infinite alternate; }
+@keyframes glowDrift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(4%, -6%, 0) scale(1.12); }
+}
+.glow--blue     { animation-duration: 38s; animation-direction: alternate-reverse; }
+.glow--lavender { animation-duration: 34s; }
+
+/* Pillar icons draw their stroke on entry */
+.js [data-reveal] .pillar__icon svg { stroke-dasharray: 90; stroke-dashoffset: 90; }
+.js [data-reveal].is-visible .pillar__icon svg {
+  animation: drawIcon 1.1s var(--ease) 0.15s forwards;
+}
+@keyframes drawIcon { to { stroke-dashoffset: 0; } }
+
+/* Stat rows lift very slightly on hover, so the grid feels alive
+   without any of them moving on their own. */
+.stat { transition: background-color var(--t-base) var(--ease), transform var(--t-base) var(--ease); }
+.stat:hover { transform: translateY(-3px); }
+
+/* Hero content drifts up and dims as it scrolls away — set by JS. */
+.hero__content { will-change: transform, opacity; }
+
+/* ---------------------------------------------------------------
+   20 · REDUCED MOTION
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .js [data-reveal] { opacity: 1 !important; transform: none !important; }
+  .js .word__i { transform: none !important; }
+  .hero__media video { display: none; }
+  .hero__media img { animation: none; }
+  .marquee__track { animation: none; flex-wrap: wrap; justify-content: center; width: 100%; padding-right: 0; }
+  .marquee__inner { animation: none; }
+  .hero__cue { display: none; }
+  .card__clip { display: none; }
+
+  /* Extended motion — all of it off. Nothing here carries meaning that
+     is lost by removing it, and the clip-path in particular MUST be
+     reset or card images would stay clipped to zero height. */
+  .scroll-progress { display: none; }
+  .glow { animation: none !important; }
+  /* Logo stage: hold the final composed frame, no motion */
+  .logo-stage__mark { animation: none !important; opacity: 1; filter: none; }
+  .orbit { animation: none !important; opacity: 1; }
+  .logo-stage__glow { animation: none !important; }
+  /* Extended hero motion. The sweeping arcs and the pulse rings only read
+     as motion, so they go entirely rather than freezing mid-travel — a
+     stopped arc would look like a stray bright patch on one ring. */
+  .orbit::before { display: none; }
+  .orbit::after { animation: none !important; }
+  .logo-stage__pulse { display: none; }
+  .logo-stage__dust { display: none; }
+  .js [data-reveal] .card__media img,
+  .js [data-reveal].card .card__media img { clip-path: none !important; }
+  .js [data-reveal] .pillar__icon svg { stroke-dasharray: none; stroke-dashoffset: 0; }
+  .js [data-reveal].is-visible .pillar__icon svg { animation: none; }
+  /* The spotlight only reads as motion, so it goes entirely rather than
+     freezing as a static bright patch on one corner. */
+  .initiative-card::before { display: none; }
+  .js .card:hover, .js .person:hover, .js .pillar:hover,
+  .card, .person, .pillar, .stat, .idea-card { transform: none !important; }
+  .stepper__step.is-now .stepper__dot { animation: none; box-shadow: 0 0 0 4px var(--accent-wash); }
+  .btn.is-magnetic, .page-back.is-magnetic { transform: none !important; }
+  .hero__content { transform: none !important; opacity: 1 !important; }
+  .nav__link::after { transition: none; }
+}
+
+/* ---------------------------------------------------------------
+   21 · PRINT
+   --------------------------------------------------------------- */
+@media print {
+  .site-header, .hero__media, .hero__cue, .site-footer, .btn, .filters { display: none !important; }
+  body { background: #fff; }
+  .card, .pillar, .stat { box-shadow: none; border: 1px solid #ccc; }
+}
+
+/* ---------------------------------------------------------------
+   22 · NEED SUPPORT
+   Placed at the end of the file on purpose: it has to land after
+   .nav__link::after to cancel the underline sweep, and after the
+   900px nav block to restyle the item inside the mobile menu.
+   Moving this block earlier silently undoes both.
+   --------------------------------------------------------------- */
+.nav__link--support {
+  gap: 7px;
+  margin-inline-start: var(--s-2xs);
+  color: var(--accent);
+  font-weight: var(--w-sub);
+  border: 1px solid rgba(61, 102, 153, 0.32);
+  background: rgba(61, 102, 153, 0.05);
+  transition: color var(--t-fast) var(--ease),
+              background-color var(--t-fast) var(--ease),
+              border-color var(--t-fast) var(--ease);
+}
+.nav__link--support:hover,
+.nav__link--support:focus-visible {
+  color: var(--accent-hover);
+  background: rgba(61, 102, 153, 0.18);
+  border-color: rgba(61, 102, 153, 0.55);
+}
+/* The sweep marks section links. This is a button, so it does not get one. */
+.nav__link--support::after { content: none; }
+
+.nav__support-icon { width: 16px; height: 16px; flex: none; }
+
+/* Between the mobile breakpoint and 1140px a seventh labelled item pushes
+   the logo and links together. Drop to the icon; the anchor carries an
+   aria-label, so nothing is lost. */
+@media (min-width: 901px) and (max-width: 1140px) {
+  .nav__support-label {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  .nav__link--support { padding-inline: var(--s-xs); }
+}
+
+/* In the mobile menu the items are full-width rows, so a bordered pill in
+   the middle of them looks like a mistake. Keep the accent, drop the box,
+   and separate it with a rule. */
+@media (max-width: 900px) {
+  .nav__link--support {
+    justify-content: flex-start;
+    margin-inline-start: 0; margin-block-start: var(--s-2xs);
+    padding-block-start: var(--s-2xs);
+    border: 0; border-top: 1px solid var(--line);
+    border-radius: 0; background: none;
+  }
+  .nav__link--support:hover,
+  .nav__link--support:focus-visible { background: rgba(61, 102, 153, 0.10); }
+  .nav__support-icon { width: 18px; height: 18px; }
+}
+
+/* ---------------------------------------------------------------
+   23 · NAV LOGO — hold its aspect ratio
+   The support item made .nav a seven-item row, and .nav__logo, an
+   ordinary flex item, started shrinking to make room. The global
+   `img { max-width: 100% }` then clamped the wordmark's width against
+   a fixed 28px height, squashing it. Pin the logo; let the links
+   absorb the pressure instead.
+   --------------------------------------------------------------- */
+.nav__logo { flex: 0 0 auto; }
+.nav__logo img { height: 28px; width: auto; max-width: none; }
+.nav__links { min-width: 0; }
+
+@media (min-width: 1280px) {
+  .nav__logo { margin-inline-end: var(--s-md); }
+}
+/* ---------------------------------------------------------------
+   24 · MARQUEE ON MOBILE — pace and entry
+   Appended at the end so it lands after the 42s shorthand (§11) and
+   after the earlier 760px block. Both are `animation` shorthands or
+   equal-specificity rules, so an earlier declaration would be reset.
+   Desktop is deliberately untouched.
+   --------------------------------------------------------------- */
+@media (max-width: 760px) {
+  /* 20s still read as a crawl on a phone: the same travel through a much
+     narrower window is a slower apparent speed, not a faster one. */
+  .marquee__inner { animation-duration: 12s; }
+
+  /* The pop. The desktop mask is clear by 12%, which on a 360px screen is
+     about 43px — a logo crosses that in a few frames, so it appears rather
+     than arrives. Widening the ramp to 22% gives it roughly 80px to fade
+     through, which reads as continuous motion instead of an entrance. */
+  .marquee {
+    mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  }
+}

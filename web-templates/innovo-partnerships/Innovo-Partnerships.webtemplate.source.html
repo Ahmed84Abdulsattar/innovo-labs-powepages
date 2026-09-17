@@ -1,0 +1,147 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — Partnerships
+  Power Pages Web Template · Name: "Innovo Partnerships"
+  URL: /partnerships
+
+  Grouped by the three types named in the brief — Academic, Venture
+  Capital, Government — because the categories are the point. A flat
+  logo wall says "we know people"; the grouping says what each
+  relationship is actually for.
+
+  Read-only. No enquiry form, no contact CTA.
+=============================================================================
+{% endcomment %}
+
+
+{% include 'Innovo Labs Head' %}
+{% fetchxml partners %}
+<fetch>
+  <entity name="innovo_partner">
+    <attribute name="innovo_partnerid" />
+    <attribute name="innovo_name" />
+    <attribute name="innovo_logourl" />
+    <attribute name="innovo_website" />
+    <attribute name="innovo_type" />
+    <attribute name="innovo_description" />
+    <order attribute="innovo_type" />
+    <order attribute="innovo_sortorder" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+
+<section class="section" style="padding-top:calc(64px + var(--s-2xl))">
+  <span class="glow glow--lavender" style="width:600px;height:600px;top:-220px;left:-180px"></span>
+
+  <div class="wrap">
+    <a class="page-back" href="/" data-magnetic>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Home
+    </a>
+
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">Partnerships</p>
+      <h1 class="section-title">We don't innovate alone.</h1>
+    </div>
+
+    {% comment %} ---- What each relationship is for ---- {% endcomment %}
+    {% comment %} Government, Academic, Venture Capital — the same order as the
+       partner groups further down the page. Two orderings of the same three
+       categories on one page reads as an inconsistency, not a choice. {% endcomment %}
+    <div class="pillars" data-reveal-group style="margin-bottom:var(--s-2xl)">
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>
+        </div>
+        <h3 class="pillar__name">Government</h3>
+        <p class="pillar__desc">Alignment with national innovation programmes, standards and sustainability targets.</p>
+      </article>
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/></svg>
+        </div>
+        <h3 class="pillar__name">Academia</h3>
+        <p class="pillar__desc">Early access to research, and live sites for trials that need a real project rather than a lab.</p>
+      </article>
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg>
+        </div>
+        <h3 class="pillar__name">Venture Capital</h3>
+        <p class="pillar__desc">Sight of construction-tech startups before they scale — and a route to pilot them first.</p>
+      </article>
+    </div>
+
+    {% if partners.results.entities.size > 0 %}
+
+      {% comment %}
+        Explicit running order rather than whatever FetchXML sorts to.
+        Alphabetically the types come out Academic, Government, Venture
+        Capital; the order below is the one the business asked for.
+
+        group_by does not exist in Power Pages Liquid, so each type gets
+        its own pass over the collection. With a handful of partners the
+        cost is irrelevant, and it makes the order a single editable line.
+
+        The trailing pass catches any type NOT in the list — a typo, or a
+        category added later — so a partner can never silently vanish from
+        the page.
+      {% endcomment %}
+      {% comment %} The stored innovo_type is still "Academic" — this list has to
+         match the data. Only the heading printed for that group is relabelled,
+         below, so nothing in Dataverse needs renaming. {% endcomment %}
+      {% assign type_order = 'Government,Academic,Venture Capital' | split: ',' %}
+
+      {% for ptype in type_order %}
+        {% assign group_size = 0 %}
+        {% for p in partners.results.entities %}
+          {% if p.innovo_type == ptype %}{% assign group_size = group_size | plus: 1 %}{% endif %}
+        {% endfor %}
+
+        {% if group_size > 0 %}
+          {% comment %} The stored value is "Academic"; the heading reads "Academia".
+             Relabelled here rather than renamed in Dataverse, so the grouping above
+             keeps matching what is actually in the Type column. {% endcomment %}
+          {% assign ptype_label = ptype %}
+          {% if ptype == 'Academic' %}{% assign ptype_label = 'Academia' %}{% endif %}
+          <h2 class="section-title" style="font-size:var(--fs-h2);margin:var(--s-2xl) 0 var(--s-md)"
+              data-reveal>{{ ptype_label }}</h2>
+          <div class="people people--partners" data-reveal-group>
+          {% for p in partners.results.entities %}
+            {% if p.innovo_type == ptype %}
+              {% include 'Innovo Partner Card' partner: p %}
+            {% endif %}
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      {% comment %} Anything whose type is not one of the three above {% endcomment %}
+      {% assign other_size = 0 %}
+      {% for p in partners.results.entities %}
+        {% unless type_order contains p.innovo_type %}{% assign other_size = other_size | plus: 1 %}{% endunless %}
+      {% endfor %}
+      {% if other_size > 0 %}
+        <h2 class="section-title" style="font-size:var(--fs-h2);margin:var(--s-2xl) 0 var(--s-md)"
+            data-reveal>Other partners</h2>
+        <div class="people people--partners" data-reveal-group>
+        {% for p in partners.results.entities %}
+          {% unless type_order contains p.innovo_type %}
+            {% include 'Innovo Partner Card' partner: p %}
+          {% endunless %}
+        {% endfor %}
+        </div>
+      {% endif %}
+
+
+    {% else %}
+      <div class="empty">
+        <div class="empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        </div>
+        <p style="color:var(--text-soft)">Partners haven't been published yet.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% include 'Innovo Labs Foot' %}

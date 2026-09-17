@@ -1,0 +1,135 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — Explore Challenges (standalone page)
+  Power Pages Web Template · Name: "Innovo Challenges"
+  URL: /challenges
+
+  Lifted off the homepage, where seven cards in a grid was the eighth
+  section of a long scroll and read as a footnote. The set is the brief
+  for the whole programme — every idea submitted is answering one of
+  these — so it earns a page rather than a slot.
+
+  Hardcoded rather than table-driven: the set is fixed, defined by the
+  business, and referred to by number elsewhere. A Dataverse table would
+  add an editing surface for content that is not meant to drift. If that
+  changes, the shape here matches innovo_liveinitiative closely enough
+  to swap in a fetchxml loop without touching the CSS.
+
+  Read-only apart from the closing link to the idea form.
+=============================================================================
+{% endcomment %}
+
+
+{% include 'Innovo Labs Head' %}
+
+<section class="section" style="padding-top:calc(64px + var(--s-2xl))">
+  <span class="glow glow--aqua" style="width:620px;height:620px;top:-240px;left:-200px"></span>
+  <span class="glow glow--lavender" style="width:480px;height:480px;top:120px;right:-200px"></span>
+
+  <div class="wrap">
+    <a class="page-back" href="/" data-magnetic>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Home
+    </a>
+
+    {% comment %}
+      Headline left, the count and the framing right. The count is the
+      one number on the page and it is small — seven is a set a reader
+      can hold in their head, which is the point worth making up front.
+    {% endcomment %}
+    <div class="ch-hero" data-reveal>
+      <div class="section-head" style="margin-bottom:0">
+        <p class="eyebrow">Explore challenges</p>
+        <h1 class="section-title">The seven problems we are<br>asking the business to solve.</h1>
+      </div>
+
+      <aside class="ch-hero__aside">
+        <p class="ch-count"><span class="ch-count__num">07</span><span class="ch-count__label">open<br>challenges</span></p>
+        <p class="ch-hero__note">
+          Every idea submitted to Innovo Labs is answering one of these. They were
+          set by the business, not by the programme &mdash; which is why an idea that
+          lands squarely on one moves faster than an idea that lands near none.
+        </p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+
+{% comment %} ══════════ The seven ══════════
+  A card grid. Still an <ol> underneath: these are referred to as
+  "challenge 4" in campaign material, so the order carries information even
+  though the cards are read as a set rather than a sequence.
+{% endcomment %}
+<section class="section section--tight-top">
+  <div class="wrap">
+    <ol class="ch-list" data-reveal-group>
+
+      <li class="ch-item" data-reveal>
+        <p class="ch-item__n" aria-hidden="true">01</p>
+        <h2 class="ch-item__name">Modernising Construction Methods</h2>
+        <p class="ch-item__desc">Innovo still depends on fragmented, labour-intensive delivery methods and needs to shift toward more industrialised, technology-enabled construction to unlock productivity.</p>
+      </li>
+
+      <li class="ch-item" data-reveal>
+        <p class="ch-item__n" aria-hidden="true">02</p>
+        <h2 class="ch-item__name">BIM Value Beyond Design Coordination</h2>
+        <p class="ch-item__desc">BIM is often used too narrowly, for design coordination alone. The challenge is to unlock its full value across construction, operations, asset management and decision-making.</p>
+      </li>
+
+      <li class="ch-item" data-reveal>
+        <p class="ch-item__n" aria-hidden="true">03</p>
+        <h2 class="ch-item__name">Reducing Labour Dependency</h2>
+        <p class="ch-item__desc">Labour shortages, an ageing workforce and rising project complexity make lower dependence on manual labour essential for long-term sustainability.</p>
+      </li>
+
+      <li class="ch-item" data-reveal>
+        <p class="ch-item__n" aria-hidden="true">04</p>
+        <h2 class="ch-item__name">Data Intelligence &amp; Forecasting</h2>
+        <p class="ch-item__desc">Innovo generates enormous amounts of data, but much of it remains disconnected, unused or reactive. The challenge is turning project data into predictive intelligence.</p>
+      </li>
+
+      <li class="ch-item" data-reveal>
+        <p class="ch-item__n" aria-hidden="true">05</p>
+        <h2 class="ch-item__name">Accelerating Process Automation</h2>
+        <p class="ch-item__desc">Workflows still depend on spreadsheets, emails, manual approvals and disconnected systems. Automation aims to digitise and streamline repetitive operational tasks.</p>
+      </li>
+
+      <li class="ch-item" data-reveal>
+        <p class="ch-item__n" aria-hidden="true">06</p>
+        <h2 class="ch-item__name">Real-Time Site Operations &amp; Smart Logistics</h2>
+        <p class="ch-item__desc">Sites are dynamic environments where delays often follow poor visibility into materials, equipment, workforce movement and site conditions. The aim is connected, intelligent jobsites.</p>
+      </li>
+
+      <li class="ch-item" data-reveal>
+        <p class="ch-item__n" aria-hidden="true">07</p>
+        <h2 class="ch-item__name">Workforce, Skills and Subcontractor Experience</h2>
+        <p class="ch-item__desc">Innovo must rethink how it attracts, develops and retains talent, while improving collaboration with the subcontractors who perform most project work.</p>
+      </li>
+
+    </ol>
+  </div>
+</section>
+
+
+{% comment %} ══════════ Closing ══════════
+  The one action on the page, and it belongs here: a reader who has just
+  read all seven is the reader most likely to have an answer to one.
+{% endcomment %}
+<section class="section section--tint">
+  <div class="wrap">
+    <div class="ch-cta" data-reveal="scale">
+      <h2 class="section-title" style="font-size:var(--fs-h2);margin-bottom:var(--s-xs)">Have an answer to one of these?</h2>
+      <p class="section-intro" style="margin-bottom:var(--s-lg)">
+        Ideas are reviewed against the five pillars and scored on the challenge they address.
+        You do not need a finished solution &mdash; a clear problem and a credible direction is enough.
+      </p>
+      <a class="btn btn--accent btn--lg" href="/submit-an-idea">
+        Submit an idea
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+{% include 'Innovo Labs Foot' %}

@@ -1,0 +1,15 @@
+adx_accountrelationship: 
+adx_append: false
+adx_appendto: false
+adx_contactrelationship: 
+adx_create: false
+adx_delete: false
+adx_entitylogicalname: innovo_ideaactivity
+adx_entityname: Innovo Idea Activity – via idea
+adx_entitypermission_webrole: []
+adx_entitypermissionid: 730f9a8b-8134-4884-a19b-a6de59c814b1
+adx_parententitypermission: 0dbde385-555c-47ad-bde4-2a22ebbea274
+adx_parentrelationship: innovo_ideaactivity_Idea_innovo_idea
+adx_read: true
+adx_scope: 756150003
+adx_write: false

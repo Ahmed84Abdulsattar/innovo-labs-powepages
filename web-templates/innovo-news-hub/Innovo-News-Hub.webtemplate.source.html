@@ -1,0 +1,136 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — Inside Innovo Labs (the news hub)
+  Power Pages Web Template · Name: "Innovo News Hub"
+  URL: /news
+
+  Read-only. No submission or action CTAs anywhere on this site.
+
+  Rendering is hybrid on purpose:
+    · The first page of posts is server-rendered by FetchXML below, so
+      first paint is fast, the content is in the HTML for search, and
+      the page works with JavaScript disabled.
+    · Category filtering and "Load more" run client-side against the
+      Power Pages Web API, so neither reloads the page.
+
+  Category filter state also lives in the querystring (?category=Pilot),
+  which keeps a filtered view shareable and the browser Back button
+  behaving the way readers expect.
+=============================================================================
+{% endcomment %}
+
+
+{% include 'Innovo Labs Head' %}
+{% assign page_size = 9 %}
+{% assign active_cat = request.params['category'] %}
+
+{% fetchxml posts %}
+<fetch top="{{ page_size }}">
+  <entity name="innovo_newspost">
+    <attribute name="innovo_newspostid" />
+    <attribute name="innovo_title" />
+    <attribute name="innovo_slug" />
+    <attribute name="innovo_summary" />
+    <attribute name="innovo_category" />
+    <attribute name="innovo_publishedon" />
+    <attribute name="innovo_thumbnailurl" />
+    <attribute name="innovo_teaserclipurl" />
+    <attribute name="innovo_hasvideo" />
+    <attribute name="innovo_videoembedurl" />
+    <attribute name="innovo_featured" />
+    <filter type="and">
+      <condition attribute="statuscode" operator="eq" value="1" />
+      <condition attribute="innovo_publishedon" operator="on-or-before" value="{{ 'now' | date: 'yyyy-MM-dd' }}" />
+      {% if active_cat %}
+        <condition attribute="innovo_category" operator="eq" value="{{ active_cat | escape }}" />
+      {% endif %}
+    </filter>
+    <order attribute="innovo_featured" descending="true" />
+    <order attribute="innovo_publishedon" descending="true" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+
+<section class="section" style="padding-top:calc(64px + var(--s-2xl))">
+  <span class="glow glow--aqua" style="width:560px;height:560px;top:-200px;right:-160px"></span>
+
+  <div class="wrap">
+
+    <a class="page-back" href="/" data-magnetic>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Home
+    </a>
+
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">Inside Innovo Labs</p>
+      <h1 class="section-title">Everything happening across Innovo Labs.</h1>
+      <p class="section-intro">
+        Pilots, partnerships, awards and the stories behind the initiatives
+        &mdash; updated as the programme moves.
+      </p>
+    </div>
+
+    {% comment %}
+      Real links, not buttons — so they work without JS, can be opened in
+      a new tab, and are announced correctly by screen readers. The JS
+      upgrades them to filter in place.
+    {% endcomment %}
+    <div class="filters" data-filters data-reveal="fade" role="group" aria-label="Filter by category">
+      <a class="filter" href="/news"
+         aria-pressed="{% unless active_cat %}true{% else %}false{% endunless %}"
+         data-cat="">All</a>
+      {% assign cats = 'Announcement,Pilot,Partnership,Award,Event,Inside Innovo Labs' | split: ',' %}
+      {% for c in cats %}
+        <a class="filter" href="/news?category={{ c | url_encode }}"
+           aria-pressed="{% if active_cat == c %}true{% else %}false{% endif %}"
+           data-cat="{{ c }}">{{ c }}</a>
+      {% endfor %}
+    </div>
+
+    {% if posts.results.entities.size > 0 %}
+      <div class="news-grid" data-news-grid data-reveal-group>
+        {% for post in posts.results.entities %}
+          {% if forloop.first and post.innovo_featured and active_cat == blank %}
+            {% include 'Innovo News Card' post: post featured: true %}
+          {% else %}
+            {% include 'Innovo News Card' post: post %}
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% comment %}
+        Only offer "Load more" when the first page came back full. A short
+        first page means there is nothing behind the button — the JS removes
+        it after a click that returns too few, but that is one click too late.
+      {% endcomment %}
+      {% if posts.results.entities.size >= page_size %}
+      <div style="margin-top:var(--s-xl);text-align:center">
+        <button class="btn btn--ghost" type="button" data-load-more
+                data-skip="{{ page_size }}"
+                data-size="{{ page_size }}"
+                data-category="{{ active_cat }}">
+          Load more
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </button>
+        {% comment %} Announced to screen readers when new cards arrive {% endcomment %}
+        <p class="sr-only" role="status" aria-live="polite" data-load-status></p>
+      </div>
+      {% endif %}
+    {% else %}
+      <div class="empty">
+        <div class="empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+        <p style="color:var(--text-soft);margin-bottom:var(--s-2xs)">
+          {% if active_cat %}Nothing in “{{ active_cat }}” yet.{% else %}No stories published yet.{% endif %}
+        </p>
+        {% if active_cat %}
+          <a class="link-arrow" href="/news">Show everything</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% include 'Innovo Labs Foot' %}

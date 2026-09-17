@@ -1,0 +1,166 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — News card (partial)
+  Power Pages Web Template · Name: "Innovo News Card"
+
+  Usage:  {% include 'Innovo News Card' post: post %}
+          {% include 'Innovo News Card' post: post featured: true %}
+
+  Thumbnail resolution order:
+    1. innovo_thumbnailurl  — an explicit CDN link, if marketing set one
+    2. the Dataverse Image column, served through the Web API
+    3. a branded gradient placeholder, so a card is never empty
+
+  The optional teaser clip is a SHORT SILENT MP4, separate from the
+  article's full-length video. It carries preload="none", so a grid of
+  these costs nothing until the pointer rests on a card (see initCardClips
+  in innovo-labs.js). Posts without a teaser simply show the still.
+=============================================================================
+{% endcomment %}
+
+{% assign id       = post.innovo_newspostid %}
+{% assign slug     = post.innovo_slug | default: id %}
+{% assign category = post.innovo_category | default: 'Update' %}
+
+{% comment %} Web API image endpoint — requires the Site Settings entries listed in SETUP.md {% endcomment %}
+{% assign img = post.innovo_thumbnailurl %}
+{% unless img %}
+  {% assign img = '/_api/innovo_newsposts(' | append: id | append: ')/innovo_thumbnail/$value' %}
+{% endunless %}
+
+{% comment %}
+  Automatic thumbnail from the video itself.
+
+  With no explicit Thumbnail URL, and a video that is a direct .mp4/.webm we
+  serve ourselves, the browser can paint the frame — no still to produce, no
+  second file to keep in step with the video.
+
+  This is impossible for a SharePoint or Stream embed. That is an iframe on
+  another origin, and nothing on this page may read a pixel out of it. Those
+  posts still need a Thumbnail URL.
+
+  An explicit Thumbnail URL always wins: a chosen frame beats an arbitrary one.
+{% endcomment %}
+{% assign auto_poster = false %}
+{% unless post.innovo_thumbnailurl %}
+  {% assign vurl = post.innovo_videoembedurl | downcase %}
+  {% if vurl contains '.mp4' %}{% assign auto_poster = true %}{% endif %}
+  {% if vurl contains '.webm' %}{% assign auto_poster = true %}{% endif %}
+{% endunless %}
+
+{% comment %}
+  The thumbnail is shown ONLY for posts that carry a video, driven by the
+  Has video flag. A written post gets a text card instead.
+
+  The reasoning: an image earns its space when it stands in for something
+  you can watch. On a text post the thumbnail was decorative, and a wall of
+  stock-ish images made every story look alike.
+
+  Consequence to know: the category badge is positioned inside the media
+  box, so a card with no media needs it back in the body flow - hence the
+  --inline variant below.
+{% endcomment %}
+{% assign has_media = post.innovo_hasvideo %}
+
+<article class="card {% if featured %}card--featured{% endif %}{% unless has_media %} card--textonly{% endunless %}"
+         {% if has_media and post.innovo_teaserclipurl %}data-clip{% endif %}
+         data-reveal>
+
+  {% if has_media %}
+    <div class="card__media">
+      {% if auto_poster %}
+        {% comment %}
+          #t=0.5 seeks half a second in — frame zero is very often black or a
+          fade-up. preload="metadata" fetches the header and that one frame,
+          not the whole file, so a grid of these stays cheap.
+        {% endcomment %}
+        <video class="card__poster" muted playsinline preload="metadata"
+               aria-hidden="true" tabindex="-1"
+               disablepictureinpicture disableremoteplayback
+               controlslist="nodownload noplaybackrate noremoteplayback">
+          <source src="{{ post.innovo_videoembedurl | escape }}#t=0.5">
+        </video>
+      {% else %}
+        <img src="{{ img }}"
+             alt=""
+             loading="lazy"
+             decoding="async"
+             width="800" height="450"
+             onerror="this.style.background='linear-gradient(135deg,#1f373c,#122023)';this.removeAttribute('src')">
+      {% endif %}
+
+      {% if post.innovo_teaserclipurl %}
+        {% comment %} preload="none" is load-bearing — do not change it {% endcomment %}
+        <video class="card__clip" muted loop playsinline preload="none"
+               aria-hidden="true" tabindex="-1"
+               disablepictureinpicture disableremoteplayback
+               controlslist="nodownload noplaybackrate noremoteplayback">
+          <source src="{{ post.innovo_teaserclipurl | escape }}" type="video/mp4">
+        </video>
+      {% endif %}
+
+      {% comment %}
+        No category badge on a video card. The still already says what the
+        story is, and the badge sat in the same corner as the play marker,
+        so the two competed. Text-only cards keep theirs (the --inline
+        variant below) because they have no image to carry that job.
+      {% endcomment %}
+
+      {% comment %} Media only renders for video posts, so this always applies {% endcomment %}
+      <span class="card__play" aria-hidden="true" title="Contains video">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </span>
+
+      {% comment %} Scrim only under the title, so the still stays visible. {% endcomment %}
+      <span class="card__veil" aria-hidden="true"></span>
+    </div>
+  {% endif %}
+
+  {% comment %}
+    A card with media carries only its title, laid over the still. Date, excerpt
+    and the Read affordance were three more things competing with a picture that
+    already says what the story is — and the split between image and text panel
+    made each card read as two objects. A text-only post keeps the full body,
+    because there is no image to carry it.
+  {% endcomment %}
+  <div class="card__body">
+    {% unless has_media %}
+      <span class="card__badge card__badge--inline">{{ category }}</span>
+
+      <p class="card__meta">
+        <time datetime="{{ post.innovo_publishedon | date: 'yyyy-MM-dd' }}">
+          {{ post.innovo_publishedon | date: 'd MMM yyyy' }}
+        </time>
+      </p>
+    {% endunless %}
+
+    <h3 class="card__title">
+      {% comment %}
+        One link spanning the whole card via ::after, so the card is a
+        single tab stop instead of three competing ones.
+      {% endcomment %}
+      {% comment %}
+        Query string rather than /news/<slug>. Power Pages validates the
+        Partial Url field and rejects a {slug} wildcard — it only accepts
+        letters, numbers, hyphens and underscores. So the Article page sits
+        at the fixed path /news/article and carries the slug as a parameter.
+        innovo-news-detail.liquid already reads request.params['slug'].
+      {% endcomment %}
+      <a class="card__link" href="/news/article?slug={{ slug | url_encode }}">{{ post.innovo_title }}</a>
+    </h3>
+
+    {% unless has_media %}
+      {% if post.innovo_summary %}
+        <p class="card__excerpt">{{ post.innovo_summary | strip_html | truncate: 165 }}</p>
+      {% endif %}
+
+      <div class="card__foot">
+        <span class="link-arrow" aria-hidden="true">
+          Read
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+    {% endunless %}
+  </div>
+</article>

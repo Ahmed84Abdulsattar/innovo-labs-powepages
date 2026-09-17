@@ -1,0 +1,23 @@
+# Deployment manifest written by pac pages download/upload - environment-specific
+.portalconfig/
+
+# Media is served from the site, not versioned here
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.svg
+*.mp4
+*.webm
+*.woff
+*.woff2
+*.ttf
+
+# Local backups and editor state
+*.devbackup
+*.before-fix
+.vscode/
+.claude/
+Thumbs.db
+.DS_Store

@@ -1,0 +1,53 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — Partner card
+  Power Pages Web Template · Name: "Innovo Partner Card"
+
+  Usage:  {% include 'Innovo Partner Card' partner: p %}
+
+  Pulled out of innovo-partnerships.liquid because that page renders the
+  same card from two places — once per type in the running order, and once
+  more for any type outside it. Keeping one copy means the two can never
+  drift apart.
+
+  Deliberately NOT clickable. Everything worth knowing is on the card, so
+  there is no detail page behind it; only the "Visit site" link leaves.
+=============================================================================
+{% endcomment %}
+
+<article class="person" data-reveal>
+  <div class="person__photo" style="aspect-ratio:16/10;background:var(--surface)">
+    {% if partner.innovo_logourl %}
+      <img src="{{ partner.innovo_logourl | escape }}" alt="{{ partner.innovo_name | escape }}"
+           loading="lazy" style="object-fit:contain;padding:var(--s-md)">
+    {% else %}
+      {% comment %}
+        Name in a tinted panel when there is no logo — marketing will not
+        have artwork for every partner on day one, and a card that looks
+        deliberate beats an empty box.
+      {% endcomment %}
+      <div class="person__initials" style="font-size:1.15rem;letter-spacing:-0.01em;padding:var(--s-sm);text-align:center">
+        {{ partner.innovo_name }}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="person__body">
+    <p class="person__name" style="font-size:var(--fs-h3)">{{ partner.innovo_name }}</p>
+
+    {% if partner.innovo_description %}
+      <p class="person__role" style="margin-top:var(--s-2xs)">{{ partner.innovo_description }}</p>
+    {% endif %}
+
+    {% if partner.innovo_website %}
+      {% comment %} External link — new tab, and rel set for safety {% endcomment %}
+      <a class="link-arrow" href="{{ partner.innovo_website | escape }}" target="_blank" rel="noopener noreferrer"
+         style="margin-top:var(--s-2xs)">
+        Visit site
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>
+        <span class="sr-only">(opens in a new tab)</span>
+      </a>
+    {% endif %}
+  </div>
+</article>

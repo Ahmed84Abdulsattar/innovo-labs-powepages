@@ -1,0 +1,908 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — Home
+  Power Pages Web Template · Name: "Innovo Labs Home"
+
+  Section order follows the brief exactly.
+
+  The full "Inside Innovo Labs" hub is not on this page — the homepage
+  carries only the latest three posts and links through to /news.
+  Labs Champions likewise appears here as a banner only; the teams
+  themselves live on /champions.
+=============================================================================
+{% endcomment %}
+
+
+{% include 'Innovo Labs Head' %}
+{% fetchxml config %}
+<fetch top="1">
+  <entity name="innovo_siteconfig">
+    <attribute name="innovo_herovideourl" />
+    <attribute name="innovo_herovideowebm" />
+    <attribute name="innovo_heroposterurl" />
+    <attribute name="innovo_portalurl" />
+    <attribute name="innovo_campaigndeadline" />
+    <attribute name="innovo_showcountdown" />
+    <attribute name="innovo_campaigntitle" />
+    <attribute name="innovo_campaignintro" />
+    <attribute name="innovo_showsubmitbutton" />
+    <attribute name="innovo_ideaformurl" />
+    <attribute name="innovo_showwinner" />
+    <attribute name="innovo_winnertitle" />
+    <attribute name="innovo_winnername" />
+    <attribute name="innovo_winnerrole" />
+    <attribute name="innovo_winneridea" />
+    <attribute name="innovo_winnerblurb" />
+    <attribute name="innovo_winnerimageurl" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+{% comment %} Guarded — see innovo-head.liquid {% endcomment %}
+{% assign cfg = false %}
+{% if config.results.entities.size > 0 %}{% assign cfg = config.results.entities[0] %}{% endif %}
+
+{% comment %} Loaded here rather than beside the tracker section further down.
+   The Innovators panel near the top now shows the entry count, and Liquid
+   resolves top to bottom — a query defined below its first use yields nothing
+   and fails silently, which is why that count came out blank. {% endcomment %}
+{% fetchxml snap %}
+<fetch top="1">
+  <entity name="innovo_trackersnapshot">
+    <attribute name="innovo_totaladopted" />
+    <attribute name="innovo_activeinitiatives" />
+    <attribute name="innovo_ideassubmitted" />
+    <attribute name="innovo_costsaving" />
+    <attribute name="innovo_timesaving" />
+    <attribute name="innovo_injuriesprevented" />
+    <attribute name="innovo_qualitysaving" />
+    <attribute name="innovo_esgoffset" />
+    <attribute name="innovo_asofdate" />
+    <order attribute="innovo_asofdate" descending="true" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+{% assign t = false %}
+{% if snap.results.entities.size > 0 %}{% assign t = snap.results.entities[0] %}{% endif %}
+{% assign portal = cfg.innovo_portalurl | default: 'https://labs.innovogroup.com' %}
+
+{% comment %}
+  Resolved up here because the HERO needs to know whether the Innovators
+  section will exist before it decides where its own button points. A
+  primary CTA that scrolls to a section which was switched off is worse
+  than no CTA at all.
+{% endcomment %}
+{% assign show_winner    = false %}
+{% assign show_countdown = false %}
+{% assign show_submit    = false %}
+{% if cfg.innovo_showwinner    and cfg.innovo_winnername %}{% assign show_winner    = true %}{% endif %}
+{% if cfg.innovo_showcountdown and cfg.innovo_campaigndeadline %}{% assign show_countdown = true %}{% endif %}
+{% if cfg.innovo_showsubmitbutton and cfg.innovo_ideaformurl %}{% assign show_submit = true %}{% endif %}
+{% assign has_innovators = false %}
+{% if show_winner or show_countdown %}{% assign has_innovators = true %}{% endif %}
+
+{% comment %}
+  Resolved here rather than beside the button that used to be its only
+  consumer, because the hero now links to the form directly too.
+  A new tab is right for an external form and wrong for a page on this
+  site, so that is decided from the URL rather than hardcoded.
+{% endcomment %}
+{% assign form_url = cfg.innovo_ideaformurl | default: '/submit-an-idea' %}
+{% assign form_external = false %}
+{% if form_url contains '://' %}{% assign form_external = true %}{% endif %}
+
+
+{% comment %} ══════════════════ 1 · HERO ══════════════════ {% endcomment %}
+<section class="hero">
+  {% comment %}
+    Footage is entirely optional. Leave the Site config video and poster
+    fields empty and the hero falls back to the orbit animation on the
+    tinted ground — which is the chosen treatment, not a degraded one.
+
+    Both elements are conditional: an <img> with an empty src is treated
+    by browsers as a broken image, and some re-request the page itself
+    trying to resolve it.
+  {% endcomment %}
+  <div class="hero__media">
+    {% if cfg.innovo_heroposterurl %}
+      {% comment %}
+        The poster is a real <img>, not just the video's poster attribute,
+        so there is always a painted frame: it covers the video's load gap,
+        mobile (where the video is display:none), reduced-motion, and a
+        browser refusing autoplay.
+      {% endcomment %}
+      <img src="{{ cfg.innovo_heroposterurl | escape }}" alt="" aria-hidden="true" fetchpriority="high">
+    {% endif %}
+
+    {% if cfg.innovo_herovideourl %}
+      <video autoplay muted loop playsinline preload="metadata"
+             disablepictureinpicture disableremoteplayback
+             controlslist="nodownload noplaybackrate noremoteplayback"
+             poster="{{ cfg.innovo_heroposterurl | escape }}" aria-hidden="true" tabindex="-1">
+        {% if cfg.innovo_herovideowebm %}
+          <source src="{{ cfg.innovo_herovideowebm | escape }}" type="video/webm">
+        {% endif %}
+        <source src="{{ cfg.innovo_herovideourl | escape }}" type="video/mp4">
+      </video>
+    {% endif %}
+  </div>
+
+  <div class="hero__scrim"></div>
+
+  {% comment %}
+    Orbit rings, pulses and drifting motes behind the wordmark.
+
+    Deliberately a SIBLING of .hero__scrim and placed AFTER it. Inside
+    .hero__media it painted underneath a wash that runs up to 94% opaque,
+    which flattened the animation to almost nothing. The footage stays
+    behind the scrim; the animation sits in front of it.
+    CSS: .logo-stage z-index 2, .hero__scrim 1, .hero__content 3.
+  {% endcomment %}
+  <div class="logo-stage" aria-hidden="true">
+    <span class="logo-stage__glow"></span>
+    <span class="logo-stage__pulse"></span>
+    <span class="logo-stage__pulse logo-stage__pulse--2"></span>
+    <span class="logo-stage__pulse logo-stage__pulse--3"></span>
+    <span class="orbit orbit--1"></span>
+    <span class="orbit orbit--2"></span>
+    <span class="orbit orbit--3"></span>
+    <span class="logo-stage__dust"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+  </div>
+
+  <div class="wrap hero__content">
+    {% comment %}
+      The wordmark replaces the "Innovo Labs" eyebrow — it says the same
+      thing better. Intrinsic 1958×263 against a ~440px display size, so
+      it stays sharp on 2× and 3× screens; the earlier 418×56 asset was
+      being upscaled 2.1× on retina and read as blurred.
+    {% endcomment %}
+    <div class="hero__logo">
+      <img src="/innovo-labs-logo.webp" alt="Innovo Labs" width="1958" height="263" fetchpriority="high">
+    </div>
+
+    {% comment %} data-split → JS masks and raises each word on a stagger.
+       One horizontal line, middot-separated, all in ink — "Lead" is NOT
+       accented here; that was changed deliberately. {% endcomment %}
+    <h1 class="hero__title" data-split>Evolve &middot; Innovate &middot; Lead</h1>
+
+    <p class="hero__lead" data-reveal="fade" style="--i:3">
+      Innovo Labs is the dedicated innovation engine of Innovo, built to embed
+      forward-thinking technology, smarter methodologies, and progressive ideas
+      across every layer of our organisation.
+    </p>
+
+    {% comment %}
+      The hero button scrolls DOWN to Innovators of Tomorrow rather than
+      jumping straight to the form. The reader arrives at the deadline,
+      the rules and who to ask before being handed a blank form — and the
+      one place that decides whether entries are open stays the section
+      itself, not two buttons that can disagree.
+
+      If that section is switched off entirely, the CTA falls back to the
+      news rather than pointing at an anchor that no longer exists.
+    {% endcomment %}
+    <div class="hero__actions" data-reveal="fade" style="--i:4">
+      {% comment %}
+        Goes straight to the form now, and in the same accent blue as the
+        button inside the Innovators section — two buttons with the same
+        words should not look different or land in different places.
+      {% endcomment %}
+      {% if has_innovators %}
+        <a class="btn btn--accent btn--lg" href="{{ form_url | escape }}"{% if form_external %} target="_blank" rel="noopener"{% endif %}>
+          Submit an idea
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      {% else %}
+        <a class="btn btn--primary" href="#inside">
+          Read the latest
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      {% endif %}
+      <a class="btn btn--ghost btn--lg" href="/tracker">Innovation Tracker</a>
+    </div>
+  </div>
+
+  <div class="hero__cue" aria-hidden="true">
+    <span class="hero__cue-line"></span>
+    Scroll
+  </div>
+</section>
+
+
+{% comment %} ══════════════════ 2 · INNOVATORS OF TOMORROW ══════════════════ {% endcomment %}
+{% comment %}
+  Two INDEPENDENT panels, each with its own on/off switch in Site Config.
+
+  They are not alternatives. The common case late in a cycle is both at
+  once — this year's winner announced while next year's competition is
+  already open for entries. Either can also run alone, and with both off
+  the whole section disappears rather than leaving an empty shell.
+
+  Winner sits first: it is the news. The countdown follows as the
+  "what's next".
+
+  Every string below comes from Site Config. Nothing here is hardcoded
+  copy, so marketing can rewrite the panel without a developer.
+{% endcomment %}
+{% if has_innovators %}
+<section class="section section--tint" id="innovators">
+  {% comment %} Two washes behind the campaign card. The tint band alone was a flat
+     field once the gloss pass lightened it, and the panel floated on nothing. {% endcomment %}
+  <span class="glow glow--aqua"     style="width:640px;height:640px;top:-180px;left:-220px"></span>
+  <span class="glow glow--lavender" style="width:560px;height:560px;bottom:-200px;right:-180px"></span>
+  <div class="wrap">
+
+    {% if show_winner %}
+      <div class="panel" data-reveal="scale">
+        <div class="panel__grid panel__grid--winner">
+
+          <div>
+            <p class="eyebrow">Innovators of Tomorrow</p>
+            <h2 class="section-title" style="font-size:var(--fs-h2)">
+              {{ cfg.innovo_winnertitle | default: 'And the winner is…' }}
+            </h2>
+
+            <p class="winner__name">{{ cfg.innovo_winnername }}</p>
+            {% if cfg.innovo_winnerrole %}
+              <p class="winner__role">{{ cfg.innovo_winnerrole }}</p>
+            {% endif %}
+            {% if cfg.innovo_winneridea %}
+              <p class="winner__idea">{{ cfg.innovo_winneridea }}</p>
+            {% endif %}
+            {% if cfg.innovo_winnerblurb %}
+              <p class="section-intro" style="margin-top:var(--s-md)">{{ cfg.innovo_winnerblurb }}</p>
+            {% endif %}
+          </div>
+
+          <div class="winner__media">
+            {% if cfg.innovo_winnerimageurl %}
+              <img src="{{ cfg.innovo_winnerimageurl | escape }}"
+                   alt="{{ cfg.innovo_winnername | escape }}" loading="lazy">
+            {% else %}
+              {% comment %} No photo yet — a trophy mark rather than an empty box,
+                 so a winner can go up the day it is decided. {% endcomment %}
+              <div class="winner__badge" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/>
+                  <path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/>
+                </svg>
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    {% endif %}
+
+    {% if show_countdown %}
+      <div class="panel {% if show_winner %}panel--stacked{% endif %}" data-reveal="scale"
+           data-countdown="{{ cfg.innovo_campaigndeadline | date: 'yyyy-MM-dd' }}T23:59:59">
+        <div class="panel__grid">
+
+          <div>
+            {% comment %} The eyebrow only repeats when this panel stands alone —
+               two identical eyebrows stacked reads as a duplication bug. {% endcomment %}
+            {% unless show_winner %}
+              <p class="eyebrow">Innovators of Tomorrow</p>
+            {% endunless %}
+            <h2 class="section-title" style="font-size:var(--fs-h2)">
+              {{ cfg.innovo_campaigntitle | default: 'The idea competition is open across every business unit.' }}
+            </h2>
+            {% comment %}
+              The prize structure is markup, not a sentence — three tiers, a
+              payment condition and a separate giveaway. One Site config text
+              field cannot express that, so it lives here. The amounts and the
+              closing date are what change year to year.
+            {% endcomment %}
+            <p class="section-intro">As part of the competition, we are offering the following prizes:</p>
+
+            <ol class="prizes">
+              <li class="prize"><span class="prize__place">1st Prize</span><span class="prize__amount">150,000<span class="prize__ccy">AED</span></span></li>
+              <li class="prize"><span class="prize__place">2nd Prize</span><span class="prize__amount">100,000<span class="prize__ccy">AED</span></span></li>
+              <li class="prize"><span class="prize__place">3rd Prize</span><span class="prize__amount">50,000<span class="prize__ccy">AED</span></span></li>
+            </ol>
+
+            <p class="prize-note">50% of the prize will be awarded when the winning idea is selected for adoption, with the remaining 50% awarded upon successful implementation.</p>
+            <p class="prize-note">Our first <strong>100 individual submissions</strong> will receive a technology travel pouch for cables and accessories.</p>
+            {% comment %} Reads the campaign deadline rather than repeating it. A hardcoded
+               date here drifted out of step with the countdown above, which is exactly
+               the failure a second copy of a value invites. {% endcomment %}
+            <p class="prize-close">Competition closes {{ cfg.innovo_campaigndeadline | date: 'd MMMM yyyy' }}</p>
+            {% comment %}
+              The only place on the site that opens the idea form. Hidden
+              the moment innovo_showsubmitbutton is set to No, so the card
+              stops inviting entries the day the competition closes.
+
+              data-cd-hide makes the countdown's own JS remove it when the
+              clock reaches zero — a safety net for the hours between the
+              deadline passing and someone getting round to flipping the
+              switch.
+            {% endcomment %}
+            {% if show_submit %}
+              {% comment %}
+                A new tab is right for an external form (forms.office.com) and
+                wrong for a page on this site — it strands the reader with a
+                duplicate tab and no back button. Decide from the URL rather
+                than hardcoding either behaviour, so switching the form's home
+                needs no template change.
+              {% endcomment %}
+              <div style="margin-top:var(--s-lg)" data-cd-hide>
+                <a class="btn btn--accent" href="{{ form_url | escape }}"{% if form_external %} target="_blank" rel="noopener"{% endif %}>
+                  Submit an idea
+                  <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </a>
+              </div>
+            {% endif %}
+
+          </div>
+
+          <div class="panel__side">
+            <p class="eyebrow" style="justify-content:center">Entries close</p>
+            <div class="countdown">
+              <div class="countdown__unit"><span class="countdown__num" data-cd="days">—</span><span class="countdown__lbl">Days</span></div>
+              <div class="countdown__unit"><span class="countdown__num" data-cd="hours">—</span><span class="countdown__lbl">Hrs</span></div>
+              <div class="countdown__unit"><span class="countdown__num" data-cd="minutes">—</span><span class="countdown__lbl">Min</span></div>
+              <div class="countdown__unit"><span class="countdown__num" data-cd="seconds">—</span><span class="countdown__lbl">Sec</span></div>
+            </div>
+            <p style="text-align:center;margin-top:var(--s-md);color:var(--text-muted);font-size:var(--fs-sm)">
+              {{ cfg.innovo_campaigndeadline | date: 'd MMMM yyyy' }}
+            </p>
+
+            {% comment %} Directly under the clock: how long is left, then how many
+               have already entered. Read together they say the same thing twice over
+               — this is live, and people are taking part. {% endcomment %}
+            {% if t.innovo_ideassubmitted %}
+            <p class="entry-count">
+              <span class="entry-count__num" data-count="{{ t.innovo_ideassubmitted }}">0</span>
+              <span class="entry-count__label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>ideas submitted</span>
+            </p>
+            {% endif %}
+            {% comment %}
+              Swapped in by the JS once the clock hits zero, so the panel
+              never sits on an expired countdown reading all zeroes.
+            {% endcomment %}
+            <p data-cd-closed hidden style="text-align:center;margin-top:var(--s-sm);color:var(--accent);font-weight:500">
+              Entries are closed and judging is under way — the winner will be announced here.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endif %}
+
+
+{% comment %} ══════════════════ 3 · WHAT WE DO ══════════════════ {% endcomment %}
+<section class="section" id="what-we-do">
+  <span class="glow glow--aqua" style="width:520px;height:520px;top:-160px;right:-120px"></span>
+
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">What we do</p>
+      <h2 class="section-title">Every initiative is measured<br>against five pillars.</h2>
+    </div>
+
+    <div class="pillars" data-reveal-group>
+
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <h3 class="pillar__name">Cost</h3>
+        <p class="pillar__desc">Direct spend avoided or recovered, measured in AED per year.</p>
+      </article>
+
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <h3 class="pillar__name">Time</h3>
+        <p class="pillar__desc">Hours returned to site and office teams every year.</p>
+      </article>
+
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <h3 class="pillar__name">Safety</h3>
+        <p class="pillar__desc">Critical safety alerts reduced before they become incidents.</p>
+      </article>
+
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2 15.09 8.26 22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <h3 class="pillar__name">Quality</h3>
+        <p class="pillar__desc">Rework avoided, defects caught earlier in the programme.</p>
+      </article>
+
+      <article class="pillar" data-reveal>
+        <div class="pillar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>
+          </svg>
+        </div>
+        <h3 class="pillar__name">ESG</h3>
+        <p class="pillar__desc">Carbon offset and environmental impact, tracked in CO&#8322;.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+
+{% comment %} ══════════════════ 4 · INNOVATION TRACKER ══════════════════
+  Figures come from the innovo_trackersnapshot table, maintained by
+  hand — IT declined an automated read from the internal portal. The
+  "Updated" stamp below is therefore not decoration: an unlabelled
+  stale number would quietly undermine the whole page.
+{% endcomment %}
+
+{% comment %} On radar and In flight are counted from the initiative rows rather
+   than typed into the snapshot, so the homepage and /tracker can never quote
+   different numbers for the same thing. Only the flag is selected — the names
+   and values belong to the tracker page, not here. {% endcomment %}
+{% comment %} Byte-for-byte the query on /tracker. Power Pages caches fetchxml
+   results per query text, so a leaner variant here got its own cache entry and
+   the two pages drifted — the homepage read 14 On radar while the tracker read
+   16. Selecting a few columns this page does not use is a cheaper price than
+   two counts of the same thing that disagree. {% endcomment %}
+{% fetchxml inits %}
+<fetch>
+  <entity name="innovo_liveinitiative">
+    <attribute name="innovo_name" />
+    <attribute name="innovo_businessunit" />
+    <attribute name="innovo_driver" />
+    <attribute name="innovo_value" />
+    <attribute name="innovo_sortorder" />
+    <attribute name="innovo_islive" />
+    <filter type="and">
+      <condition attribute="statecode" operator="eq" value="0" />
+    </filter>
+    <order attribute="innovo_sortorder" />
+    <order attribute="innovo_businessunit" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+
+{% assign n_live = 0 %}
+{% assign n_radar = 0 %}
+{% for i in inits.results.entities %}{% if i.innovo_islive %}{% assign n_live = n_live | plus: 1 %}{% else %}{% assign n_radar = n_radar | plus: 1 %}{% endif %}{% endfor %}
+
+<section class="section" id="tracker">
+  <span class="glow glow--blue" style="width:600px;height:600px;bottom:-200px;left:-180px"></span>
+
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">Innovation tracker</p>
+      <h2 class="section-title">What we're trialling, what's in flight,<br>and what it's returning.</h2>
+    </div>
+
+    {% if t %}
+      {% comment %} Adopted → In flight → On radar: what has landed, what is running,
+         what is being looked at. Strongest claim first, since the reader who stops
+         after one number should get the one that is verified. {% endcomment %}
+      <div class="tracker tracker--three" data-reveal="scale">
+
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+            Total adopted
+          </p>
+          <p class="stat__value"><span data-count="{{ t.innovo_totaladopted | default: 0 }}">0</span></p>
+          <p class="stat__sub">across all business units</p>
+        </div>
+
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12h4l3-7 4 14 3-7h6"/></svg>
+            In flight
+          </p>
+          <p class="stat__value"><span data-count="{{ n_live }}">0</span></p>
+          <p class="stat__sub">running now</p>
+        </div>
+
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            On radar
+          </p>
+          <p class="stat__value"><span data-count="{{ n_radar }}">0</span></p>
+          <p class="stat__sub">being evaluated</p>
+        </div>
+
+      </div>
+
+
+      {% comment %}
+        Split 2 + 5 rather than one auto-fit row: seven cells left an
+        orphan on the second row, and this grouping is truer anyway —
+        two programme counts, then one figure per pillar.
+      {% endcomment %}
+      <div class="tracker__pillars" data-reveal="scale">
+
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Cost saving
+          </p>
+          <p class="stat__value">
+            <span data-count="{{ t.innovo_costsaving | default: 0 }}" data-decimals="1">0</span><span class="unit">M AED</span>
+          </p>
+          <p class="stat__sub">per year</p>
+        </div>
+
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Time saving
+          </p>
+          <p class="stat__value">
+            <span data-count="{{ t.innovo_timesaving | default: 0 }}">0</span><span class="unit">hrs/yr</span>
+          </p>
+          <p class="stat__sub">returned to teams</p>
+        </div>
+
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Site safety
+          </p>
+          <p class="stat__value"><span data-count="{{ t.innovo_injuriesprevented | default: 0 }}">0</span><span class="unit unit--sym">%</span></p>
+          <p class="stat__sub">reduction in critical alerts</p>
+        </div>
+
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2 15.09 8.26 22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+            Quality
+          </p>
+          <p class="stat__value">
+            <span data-count="{{ t.innovo_qualitysaving | default: 0 }}" data-decimals="1">0</span><span class="unit">M AED</span>
+          </p>
+          <p class="stat__sub">rework prevented</p>
+        </div>
+
+        <div class="stat">
+          <p class="stat__label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/></svg>
+            ESG
+          </p>
+          <p class="stat__value">
+            <span data-count="{{ t.innovo_esgoffset | default: 0 }}">0</span><span class="unit">MT CO&#8322;</span>
+          </p>
+          <p class="stat__sub">reduced</p>
+        </div>
+
+      </div>
+
+    {% else %}
+      <div class="empty">
+        <div class="empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        </div>
+        <p style="color:var(--text-soft)">Tracker figures haven't been published yet.</p>
+      </div>
+    {% endif %}
+
+    {% comment %}
+      Outside the guard so the tracker page stays reachable before any
+      figures are published — the page carries live initiatives too, which
+      have nothing to do with the snapshot numbers.
+
+      The stamp stays inside its own guard: with no snapshot there is no
+      date to report, and "Figures updated" over an empty state would be
+      worse than silence. With the stamp absent the row centres the button
+      rather than stranding it on the left.
+    {% endcomment %}
+    <div class="tracker-foot" data-reveal="fade"{% unless t %} style="justify-content:center"{% endunless %}>
+      {% if t %}
+        <p class="tracker-stamp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Figures updated {{ t.innovo_asofdate | date: 'MMMM yyyy' }}
+        </p>
+      {% endif %}
+      <a class="btn btn--ghost" href="/tracker">Innovation Tracker
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+
+{% comment %} ══════════════════ 5 · INSIDE INNOVO LABS ══════════════════ {% endcomment %}
+{% fetchxml posts %}
+<fetch top="3">
+  <entity name="innovo_newspost">
+    <attribute name="innovo_newspostid" />
+    <attribute name="innovo_title" />
+    <attribute name="innovo_slug" />
+    <attribute name="innovo_summary" />
+    <attribute name="innovo_category" />
+    <attribute name="innovo_publishedon" />
+    <attribute name="innovo_thumbnailurl" />
+    <attribute name="innovo_teaserclipurl" />
+    <attribute name="innovo_hasvideo" />
+    <attribute name="innovo_videoembedurl" />
+    <filter type="and">
+      <condition attribute="statuscode" operator="eq" value="1" />
+      <condition attribute="innovo_publishedon" operator="on-or-before" value="{{ 'now' | date: 'yyyy-MM-dd' }}" />
+    </filter>
+    <order attribute="innovo_featured" descending="true" />
+    <order attribute="innovo_publishedon" descending="true" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+
+<section class="section" id="inside">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">Inside Innovo Labs</p>
+      <h2 class="section-title">The latest from the programme.</h2>
+      <p class="section-intro">
+        A regular look at what our teams are building, testing and learning from.
+      </p>
+    </div>
+
+    {% if posts.results.entities.size > 0 %}
+      <div class="news-grid news-grid--home" data-reveal-group>
+        {% for post in posts.results.entities %}
+          {% include 'Innovo News Card' post: post %}
+        {% endfor %}
+      </div>
+
+      <div style="margin-top:var(--s-xl);text-align:center" data-reveal="fade">
+        <a class="btn btn--ghost" href="/news">
+          Read every story
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    {% else %}
+      <div class="empty">
+        <div class="empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9h4"/><path d="M18 14h-8M18 18h-8M18 6h-8v4h8V6Z"/></svg>
+        </div>
+        <p style="color:var(--text-soft);margin-bottom:var(--s-2xs)">The first story is on its way.</p>
+        <p style="color:var(--text-muted);font-size:var(--fs-sm)">Biweekly posts begin shortly.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+
+{% comment %} ══════════════════ 6 · PARTNERSHIPS ══════════════════ {% endcomment %}
+{% fetchxml partners %}
+<fetch>
+  <entity name="innovo_partner">
+    <attribute name="innovo_name" />
+    <attribute name="innovo_logourl" />
+    <attribute name="innovo_website" />
+    <order attribute="innovo_sortorder" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+
+<section class="section" id="partnerships">
+  <div class="wrap">
+    <div class="section-head section-head--center" data-reveal>
+      <p class="eyebrow" style="justify-content:center">Partnerships</p>
+      {% comment %}
+        The supplied copy is a paragraph, not a headline. Its first clause
+        works as the title; the rest becomes the intro, so the section keeps
+        a real h2 for structure instead of opening with body text.
+      {% endcomment %}
+      <h2 class="section-title">Innovation goes hand in hand<br>with collaboration.</h2>
+      <p class="section-intro">
+        As part of our Innovo Labs strategy, we have established partnerships
+        across universities, technology ventures and government organisations,
+        to ensure we remain at the forefront of emerging technologies, ideas
+        and innovative solutions.
+      </p>
+    </div>
+
+    <div class="partner-types" data-reveal="fade">
+      {% comment %} Same order as the partnerships page and its partner groups. {% endcomment %}
+      <span class="chip">Government</span>
+      <span class="chip">Academia</span>
+      <span class="chip">Venture Capital</span>
+    </div>
+  </div>
+
+  {% if partners.results.entities.size > 0 %}
+    <div class="marquee" data-reveal="fade" aria-label="Our partners">
+      <div class="marquee__track">
+        {% for p in partners.results.entities %}
+          {% comment %} Never a link. The strip is decorative — it says who we work
+             with, and there is a Partnerships page for anyone who wants more. It used
+             to fall back to href="#" when a partner had no website, which is a link
+             to the top of the page, so tapping a logo threw the reader back to the
+             hero. A span cannot navigate, so the failure cannot recur. {% endcomment %}
+          <span class="marquee__item">
+            {% if p.innovo_logourl %}
+              {% comment %} height matches the CSS box, so the row does not jump before the stylesheet lands {% endcomment %}
+              <img src="{{ p.innovo_logourl | escape }}" alt="{{ p.innovo_name | escape }}" loading="lazy" height="54">
+            {% else %}
+              {{ p.innovo_name }}
+            {% endif %}
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% comment %}
+      Inside the guard on purpose — with no partners published there is
+      nothing behind this link, and a button onto an empty page is worse
+      than no button.
+    {% endcomment %}
+    <div class="wrap" style="margin-top:var(--s-xl);text-align:center" data-reveal="fade">
+      <a class="btn btn--ghost" href="/partnerships">See all partners
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  {% endif %}
+</section>
+
+
+{% comment %} ══════════════════ 7 · LEADERSHIP QUOTES ══════════════════ {% endcomment %}
+{% fetchxml quotes %}
+<fetch>
+  <entity name="innovo_leadershipquote">
+    <attribute name="innovo_name" />
+    <attribute name="innovo_role" />
+    <attribute name="innovo_quote" />
+    <attribute name="innovo_portraiturl" />
+    <order attribute="innovo_sortorder" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+
+{% if quotes.results.entities.size > 0 %}
+<section class="section" id="leadership">
+  <span class="glow glow--lavender" style="width:560px;height:560px;top:20%;left:50%;transform:translateX(-50%)"></span>
+
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <p class="eyebrow">Quotes from Leadership</p>
+      <h2 class="section-title">Why this matters to the people running Innovo.</h2>
+    </div>
+
+    {% comment %}
+      Merged, not split. The portrait is the BACKGROUND with a scrim
+      fading it back and the quote sitting on top — the hero's treatment
+      — rather than a photo in one column and text in the other.
+    {% endcomment %}
+    <div class="quotes" data-quotes tabindex="0" data-reveal="scale"
+         aria-roledescription="carousel" aria-label="Leadership perspectives">
+
+      {% comment %}
+        One media slot per quote — the carousel pairs quotes to portraits
+        by index, so a quote without a photo still needs a slot. It gets
+        the initials panel instead.
+      {% endcomment %}
+      <div class="quotes__media">
+        {% for q in quotes.results.entities %}
+          {% if q.innovo_portraiturl %}
+            {% comment %}
+              Optional per-photo framing, with no schema change needed.
+
+              Append #focus=X,Y to the Portrait URL and those become this
+              photo's object-position percentages — e.g.
+                .../simon.webp#focus=62,15
+              X is left-to-right, Y is top-to-bottom, both 0-100. Lower Y
+              keeps more of the head; higher X pushes the subject clear of
+              the quote text.
+
+              A fragment is ignored by browsers when loading an image, so the
+              URL still resolves normally. Leave it off and the stylesheet
+              default (70% 22%) applies.
+            {% endcomment %}
+            {% assign pfocus = '' %}
+            {% if q.innovo_portraiturl contains '#focus=' %}
+              {% assign fbits = q.innovo_portraiturl | split: '#focus=' %}
+              {% assign fxy = fbits[1] | split: ',' %}
+              {% if fxy.size == 2 %}{% assign pfocus = fxy[0] | append: '% ' | append: fxy[1] | append: '%' %}{% endif %}
+            {% endif %}
+            <img class="quotes__portrait {% if forloop.first %}is-active{% endif %}"
+                 src="{{ q.innovo_portraiturl | escape }}"
+                 {% if pfocus != '' %}style="object-position:{{ pfocus }}"{% endif %}
+                 alt="" aria-hidden="true" loading="lazy">
+          {% else %}
+            <div class="quotes__portrait quotes__portrait--initials {% if forloop.first %}is-active{% endif %}"
+                 aria-hidden="true">{{ q.innovo_name | split: ' ' | first | slice: 0 | upcase }}{{ q.innovo_name | split: ' ' | last | slice: 0 | upcase }}</div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="quotes__scrim"></div>
+
+      <div class="quotes__body">
+        {% for q in quotes.results.entities %}
+          <blockquote class="quote {% if forloop.first %}is-active{% endif %}"
+                      aria-hidden="{% unless forloop.first %}true{% endunless %}">
+            <p class="quote__mark" aria-hidden="true">&ldquo;</p>
+            <p class="quote__text">{{ q.innovo_quote }}</p>
+            {% comment %} No avatar here — the portrait IS the background now.
+               A second small copy of the same face reads as a mistake. {% endcomment %}
+            <footer class="quote__person">
+              <span class="quote__name">{{ q.innovo_name }}</span>
+              <span class="quote__role">{{ q.innovo_role }}</span>
+            </footer>
+          </blockquote>
+        {% endfor %}
+
+        {% if quotes.results.entities.size > 1 %}
+          <div class="quote-dots" role="tablist">
+            {% for q in quotes.results.entities %}
+              <button class="quote-dot" type="button" role="tab"
+                      aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                      aria-label="Show quote from {{ q.innovo_name | escape }}"></button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+
+{% comment %} ══════════════════ 8 · LABS CHAMPIONS ══════════════════
+  An introduction, not a listing. One photograph of a Champion team says
+  more than three cards of summaries, and the full set lives on
+  /champions — so this section never needs re-cutting as teams are added.
+
+  The image is a content snippet so marketing can swap it without a
+  template change; it falls back to the Web File if unset.
+{% endcomment %}
+
+<section class="section section--tint" id="champions">
+  <div class="wrap">
+    <div class="champ-banner" data-reveal>
+      <div class="champ-banner__img">
+        <img src="{{ snippets['Innovo/ChampionsBanner'] | default: '/innovo-champions-banner.webp' }}"
+             alt="An Innovo Labs Champion team on site"
+             width="1600" height="685" loading="lazy">
+      </div>
+      <div class="champ-banner__scrim"></div>
+      <div class="champ-banner__body">
+        <p class="eyebrow">Labs Champions</p>
+        <h2 class="section-title">The teams that own an initiative.</h2>
+        {% comment %}
+          Deliberately unguarded: the champions page must stay reachable from
+          the homepage whether or not any teams are published yet.
+        {% endcomment %}
+        <div class="champ-banner__actions">
+          <a class="btn btn--ghost" href="/champions">See all champions
+            <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% comment %} Explore Challenges now has its own page at /challenges. It was the
+   eighth section of a long scroll here, which made the programme brief read as
+   a footnote; the nav points straight at it. Template: "Innovo Challenges".
+{% endcomment %}
+
+{% include 'Innovo Labs Foot' %}

@@ -1,0 +1,15 @@
+- adx_name: Grant Change to Administrators
+  adx_right: 1
+  adx_webpageaccesscontrolrule_webrole:
+  - 31f9add3-648e-4baa-8b31-98190aef6ce9
+  adx_webpageaccesscontrolruleid: 544d4fce-16e7-42c7-8d24-2de27393f3ad
+  adx_webpageid: 4a0b16e5-ea83-4521-bc5c-54c3fcd8bf3f
+- adx_name: Grant Change to Content
+  adx_right: 1
+  adx_webpageaccesscontrolruleid: 6c732ba4-0d9b-45f9-914f-814f4030676d
+- adx_name: Restrict Submit an Idea to authenticated users
+  adx_right: 2
+  adx_webpageaccesscontrolrule_webrole:
+  - ee537163-2caa-457c-af7b-2b131601134b
+  adx_webpageaccesscontrolruleid: 9f3c81a2-5d4e-4b17-8c6a-1e2f7b04d9c3
+  adx_webpageid: 235e1297-f29a-f111-b8dc-70a8a520a5db

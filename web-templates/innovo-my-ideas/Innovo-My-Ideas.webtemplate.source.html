@@ -1,0 +1,343 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — My ideas
+  Power Pages Web Template · Name: "Innovo My Ideas"
+  URL: /my-ideas
+
+  Reads innovo_idea, a MIRROR of the SharePoint list. SharePoint stays the
+  system of record and the only place anyone edits; a flow copies every
+  answer here because Liquid cannot query a SharePoint list.
+
+  Every mirrored field is text, including status. Dataverse Choice columns
+  have to be set by option number from Power Automate, which would mean
+  maintaining a label-to-integer map in the flow and would break the day
+  someone adds an option in SharePoint. Nothing is hand-edited here, so
+  the validation belongs in SharePoint where the editing happens.
+
+  ── SECURITY ──────────────────────────────────────────────────────────
+  Rows are scoped by the innovo_contact lookup. The table permission on
+  innovo_idea MUST be Access type = Contact against that lookup, granted
+  to Authenticated Users, Read only. That is what stops one person
+  reading another's submissions. The filter below is a second belt on
+  top of it, not the boundary — a Global-scoped permission would expose
+  every idea in the company regardless of what this template does.
+
+  ── ACTIVITY ──────────────────────────────────────────────────────────
+  Comments and status changes live in innovo_ideaactivity, one row per
+  event, mirrored from the SharePoint "Idea Activity" list. The newest row
+  is surfaced on the card; the rest sit in the collapsed log. Read-only —
+  the portal never writes, so reviewers own the thread from SharePoint.
+=============================================================================
+{% endcomment %}
+
+
+{% include 'Innovo Labs Head' %}
+
+{% comment %} The pipeline in order, then the two states that end it. Compared by
+   string, since status is mirrored as text. Parked and Cancelled are deliberately
+   NOT stages: they replace the track rather than sit inside it. {% endcomment %}
+{% assign stages = 'Submitted,Under review,Shortlisted,In trial,Impact review,Implemented' | split: ',' %}
+{% assign closed = 'Parked,Cancelled' | split: ',' %}
+
+<section class="section" style="padding-top:calc(64px + var(--s-2xl))">
+  <span class="glow glow--lavender" style="width:600px;height:600px;top:-220px;right:-180px"></span>
+
+  <div class="wrap">
+    <a class="page-back" href="/" data-magnetic>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Home
+    </a>
+
+    {% comment %} Title and the action on one row — the person reading their own
+       submissions is the one most likely to send another. {% endcomment %}
+    <div class="myideas__head" data-reveal>
+      <div class="section-head" style="margin-bottom:0">
+        <p class="eyebrow">My ideas</p>
+        <h1 class="section-title">Everything you've submitted,<br>and where each one has got to.</h1>
+      </div>
+      <a class="btn btn--accent" href="/submit-an-idea">
+        Submit an idea
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+{% if user %}
+
+    {% fetchxml mine %}
+    <fetch>
+      <entity name="innovo_idea">
+        <attribute name="innovo_ideaid" />
+        <attribute name="innovo_ideatitle" />
+        <attribute name="innovo_submissionreference" />
+        <attribute name="innovo_ideastatus" />
+        <attribute name="innovo_submissiondate" />
+        <attribute name="innovo_mainpurpose" />
+        <attribute name="innovo_problemdescription" />
+        <attribute name="innovo_currenthandling" />
+        <attribute name="innovo_currentimpact" />
+        <attribute name="innovo_occurrence" />
+        <attribute name="innovo_affectedscope" />
+        <attribute name="innovo_ideadescription" />
+        <attribute name="innovo_suggestedtechnology" />
+        <attribute name="innovo_previousattempts" />
+        <attribute name="innovo_previoustrialoutcome" />
+        <attribute name="innovo_expectedimprovement" />
+        <attribute name="innovo_successmetrics" />
+        <attribute name="innovo_valueareas" />
+        <attribute name="innovo_potentialimpact" />
+        <attribute name="innovo_businessunits" />
+        <attribute name="innovo_businessfunctions" />
+        <attribute name="innovo_submittedby" />
+        <attribute name="innovo_testingassistance" />
+        <filter type="and">
+          <condition attribute="innovo_contact" operator="eq" value="{{ user.id }}" />
+          <condition attribute="statecode" operator="eq" value="0" />
+        </filter>
+        <order attribute="innovo_submissiondate" descending="true" />
+      </entity>
+    </fetch>
+    {% endfetchxml %}
+
+    {% assign ideas = mine.results.entities %}
+    {% comment %} Every activity row for every idea this person owns, in one
+       query. The link-entity applies the same Contact filter as the ideas
+       themselves, so an activity row can never leak past its parent. Grouped
+       per card in Liquid below rather than queried per card. {% endcomment %}
+    {% fetchxml acts %}
+    <fetch>
+      <entity name="innovo_ideaactivity">
+        <attribute name="innovo_ideaactivityid" />
+        <attribute name="innovo_eventtype" />
+        <attribute name="innovo_eventnote" />
+        <attribute name="innovo_authorname" />
+        <attribute name="innovo_eventdatetime" />
+        <attribute name="innovo_idea" />
+        <order attribute="innovo_eventdatetime" descending="true" />
+        <link-entity name="innovo_idea" from="innovo_ideaid" to="innovo_idea" alias="parent">
+          <filter type="and">
+            <condition attribute="innovo_contact" operator="eq" value="{{ user.id }}" />
+            <condition attribute="statecode" operator="eq" value="0" />
+          </filter>
+        </link-entity>
+      </entity>
+    </fetch>
+    {% endfetchxml %}
+    {% assign activity = acts.results.entities %}
+
+
+    {% if ideas.size > 0 %}
+
+      {% comment %} Five counts in one pass. A handful of rows per person, so
+         aggregate queries would cost more round trips than they save. "In
+         progress" is everything between Submitted and Implemented. {% endcomment %}
+      {% assign n_progress = 0 %}{% assign n_done = 0 %}{% assign n_parked = 0 %}{% assign n_cancelled = 0 %}
+      {% for i in ideas %}{% assign s = i.innovo_ideastatus | default: 'Submitted' %}{% if s == 'Implemented' %}{% assign n_done = n_done | plus: 1 %}{% elsif s == 'Parked' %}{% assign n_parked = n_parked | plus: 1 %}{% elsif s == 'Cancelled' %}{% assign n_cancelled = n_cancelled | plus: 1 %}{% elsif s != 'Submitted' %}{% assign n_progress = n_progress | plus: 1 %}{% endif %}{% endfor %}
+
+      <dl class="summary" data-reveal="fade">
+        <div class="summary__stat"><dt>Submitted</dt><dd>{{ ideas.size }}</dd></div>
+        <div class="summary__stat is-live"><dt>In progress</dt><dd>{{ n_progress }}</dd></div>
+        <div class="summary__stat"><dt>Implemented</dt><dd>{{ n_done }}</dd></div>
+        <div class="summary__stat"><dt>Parked</dt><dd>{{ n_parked }}</dd></div>
+        <div class="summary__stat"><dt>Cancelled</dt><dd>{{ n_cancelled }}</dd></div>
+      </dl>
+
+      <div class="myideas" data-reveal-group>
+        {% for i in ideas %}
+
+          {% assign label = i.innovo_ideastatus | default: 'Submitted' %}
+          {% assign idx = 0 %}
+          {% for st in stages %}{% if st == label %}{% assign idx = forloop.index %}{% endif %}{% endfor %}
+          {% assign is_closed = false %}
+          {% for c in closed %}{% if c == label %}{% assign is_closed = true %}{% endif %}{% endfor %}
+
+          <article class="idea-card" data-reveal>
+
+            <header class="idea-card__head">
+              <div>
+                <h2 class="idea-card__name">{{ i.innovo_ideatitle }}</h2>
+                <p class="idea-card__meta">
+                  {% if i.innovo_submissionreference != blank %}<span class="idea-card__ref">{{ i.innovo_submissionreference }}</span>{% endif %}
+                  {% if i.innovo_submissiondate %}<span>Submitted {{ i.innovo_submissiondate | date: 'd MMM yyyy' }}</span>{% endif %}
+                </p>
+              </div>
+
+              {% assign badge = 'is-open' %}
+              {% if is_closed %}{% assign badge = 'is-closed' %}{% endif %}
+              {% if label == 'Implemented' %}{% assign badge = 'is-done' %}{% endif %}
+              <span class="idea-status {{ badge }}">{{ label }}</span>
+            </header>
+
+            {% comment %} One fixed sentence per status, written here rather than
+               typed by a reviewer. It answers "what does that word mean for me",
+               which a status label alone never does — and being static it cannot
+               drift or be left blank. {% endcomment %}
+            <p class="idea-card__meaning">
+              {% if label == 'Submitted' %}Received. Waiting to be picked up by the digital team.
+              {% elsif label == 'Under review' %}Being scored against our criteria by the digital team.
+              {% elsif label == 'Shortlisted' %}Scored well enough to explore. A go/no-go decision is being made on running a trial.
+              {% elsif label == 'In trial' %}Being tested on a real project before we decide whether to roll it out.
+              {% elsif label == 'Impact review' %}The trial is finished. Results are being measured against the success criteria.
+              {% elsif label == 'Implemented' %}Live and rolled out. Thanks, this one made it all the way.
+              {% elsif label == 'Parked' %}Paused for now. It stays in the campaign and can pick up again.
+              {% elsif label == 'Cancelled' %}Withdrawn from the campaign.
+              {% else %}Status: {{ label }}.{% endif %}
+            </p>
+
+            {% comment %} No track for a parked or cancelled idea: six stages with
+               none of them current invites the reader to work out where it stopped,
+               which is not something the data records. {% endcomment %}
+            {% if idx > 0 %}
+              <ol class="stepper" aria-label="Stage {{ idx }} of {{ stages.size }}: {{ label }}">
+                {% for st in stages %}
+                  {% assign state = '' %}
+                  {% if forloop.index < idx %}{% assign state = 'is-done' %}{% endif %}
+                  {% if forloop.index == idx %}{% assign state = 'is-now' %}{% endif %}
+                  <li class="stepper__step {{ state }}">
+                    <span class="stepper__dot" aria-hidden="true"></span>
+                    <span class="stepper__label">{{ st }}</span>
+                  </li>
+                {% endfor %}
+              </ol>
+            {% endif %}
+
+            {% comment %} The newest activity entry that actually carries a note,
+               lifted onto the card. A reader should not have to open a panel to
+               find out what the review team last said. Initials are derived from
+               the author name rather than stored, so nobody maintains them. {% endcomment %}
+            {% comment %} Latest activity that actually says something. A status change
+               writes an activity row with no note, so "not blank" alone let an empty
+               card through — name and date with nothing under it. Stripping first
+               also rejects a note that is only whitespace. {% endcomment %}
+            {% assign latest = false %}
+            {% for a in activity %}{% assign note_txt = a.innovo_eventnote | default: '' | strip %}{% if a.innovo_idea.id == i.innovo_ideaid and note_txt != '' and latest == false %}{% assign latest = a %}{% endif %}{% endfor %}
+
+            {% if latest %}
+              {% assign who = latest.innovo_authorname | default: 'Innovo Labs' %}
+              {% assign parts = who | split: ' ' %}
+              <div class="idea-note">
+                <div class="idea-note__who">
+                  <span class="idea-note__avatar" aria-hidden="true">{% for p in parts limit: 2 %}{{ p | slice: 0 | upcase }}{% endfor %}</span>
+                  <span class="idea-note__name">{{ who }}</span>
+                  {% if latest.innovo_eventdatetime %}<span class="idea-note__when">&middot; {{ latest.innovo_eventdatetime | date: 'd MMM yyyy' }}</span>{% endif %}
+                </div>
+                <p class="idea-note__body">{{ latest.innovo_eventnote | newline_to_br }}</p>
+              </div>
+            {% endif %}
+
+            {% comment %} Activity, newest first. Counted before rendering so the
+               summary can carry the number without opening the panel — a reader
+               deciding whether to expand wants to know if anything is in there. {% endcomment %}
+            {% assign mine_acts = 0 %}
+            {% for a in activity %}{% if a.innovo_idea.id == i.innovo_ideaid %}{% assign mine_acts = mine_acts | plus: 1 %}{% endif %}{% endfor %}
+
+            {% if mine_acts > 0 %}
+            <details class="idea-detail">
+              <summary class="idea-detail__toggle">
+                <span>Activity ({{ mine_acts }})</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </summary>
+
+              <ol class="idea-log">
+                {% for a in activity %}
+                  {% if a.innovo_idea.id == i.innovo_ideaid %}
+                  <li class="idea-log__item{% if forloop.first %} is-latest{% endif %}">
+                    <p class="idea-log__when">{% if a.innovo_eventdatetime %}{{ a.innovo_eventdatetime | date: 'd MMM yyyy' }}{% endif %}</p>
+                    <p class="idea-log__what">
+                      {% comment %} The submission flow stamps every activity it writes with
+                         "Innovo Labs", which is right for a status change or a comment from
+                         the team and wrong for the submission itself — the person who
+                         submitted was the reader, not the programme. That one event is
+                         attributed to the idea's own submitter instead. {% endcomment %}
+                      {% assign ev = a.innovo_eventtype | default: 'Update' %}
+                      {% assign who = a.innovo_authorname %}
+                      {% if ev == 'Idea submitted' %}{% assign who = i.innovo_submittedby %}{% endif %}
+                      {{ ev }}{% if who != blank %} by <b>{{ who }}</b>{% endif %}
+                    </p>
+                    {% if a.innovo_eventnote != blank %}<p class="idea-log__note">{{ a.innovo_eventnote | newline_to_br }}</p>{% endif %}
+                  </li>
+                  {% endif %}
+                {% endfor %}
+              </ol>
+            </details>
+            {% endif %}
+
+            {% comment %} The full submission, collapsed. Twenty answers open by
+               default would bury the status, which is what the reader came for —
+               but they wrote all this and should be able to read it back without
+               going hunting. Native <details> so it works with no JS. {% endcomment %}
+            <details class="idea-detail">
+              <summary class="idea-detail__toggle">
+                <span>What you submitted</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </summary>
+
+              <div class="idea-detail__body">
+
+                <p class="idea-detail__group">The idea</p>
+                <dl class="idea-detail__list">
+                  {% if i.innovo_mainpurpose != blank %}<dt>Main purpose</dt><dd>{{ i.innovo_mainpurpose }}</dd>{% endif %}
+                  {% if i.innovo_ideadescription != blank %}<dt>Description</dt><dd>{{ i.innovo_ideadescription | newline_to_br }}</dd>{% endif %}
+                  {% if i.innovo_suggestedtechnology != blank %}<dt>Suggested technology</dt><dd>{{ i.innovo_suggestedtechnology | newline_to_br }}</dd>{% endif %}
+                </dl>
+
+                <p class="idea-detail__group">The problem</p>
+                <dl class="idea-detail__list">
+                  {% if i.innovo_problemdescription != blank %}<dt>Problem</dt><dd>{{ i.innovo_problemdescription | newline_to_br }}</dd>{% endif %}
+                  {% if i.innovo_currenthandling != blank %}<dt>Handled today by</dt><dd>{{ i.innovo_currenthandling | newline_to_br }}</dd>{% endif %}
+                  {% if i.innovo_currentimpact != blank %}<dt>Current impact</dt><dd>{{ i.innovo_currentimpact }}</dd>{% endif %}
+                  {% if i.innovo_occurrence != blank %}<dt>Occurrence</dt><dd>{{ i.innovo_occurrence }}</dd>{% endif %}
+                  {% if i.innovo_affectedscope != blank %}<dt>Affected scope</dt><dd>{{ i.innovo_affectedscope }}</dd>{% endif %}
+                </dl>
+
+                {% if i.innovo_previousattempts != blank %}
+                <p class="idea-detail__group">Tried before</p>
+                <dl class="idea-detail__list">
+                  <dt>Tried before</dt><dd>{{ i.innovo_previousattempts }}</dd>
+                  {% if i.innovo_previoustrialoutcome != blank %}<dt>Outcome</dt><dd>{{ i.innovo_previoustrialoutcome }}</dd>{% endif %}
+                </dl>
+                {% endif %}
+
+                <p class="idea-detail__group">The impact</p>
+                <dl class="idea-detail__list">
+                  {% if i.innovo_expectedimprovement != blank %}<dt>Expected improvement</dt><dd>{{ i.innovo_expectedimprovement | newline_to_br }}</dd>{% endif %}
+                  {% if i.innovo_successmetrics != blank %}<dt>Success measures</dt><dd>{{ i.innovo_successmetrics }}</dd>{% endif %}
+                  {% if i.innovo_potentialimpact != blank %}<dt>Potential impact</dt><dd>{{ i.innovo_potentialimpact }}</dd>{% endif %}
+                  {% if i.innovo_valueareas != blank %}<dt>Value areas</dt><dd>{{ i.innovo_valueareas }}</dd>{% endif %}
+                  {% if i.innovo_businessunits != blank %}<dt>Business units</dt><dd>{{ i.innovo_businessunits }}</dd>{% endif %}
+                  {% if i.innovo_businessfunctions != blank %}<dt>Business functions</dt><dd>{{ i.innovo_businessfunctions }}</dd>{% endif %}
+                  {% if i.innovo_testingassistance != blank %}<dt>Willing to help test</dt><dd>{{ i.innovo_testingassistance }}</dd>{% endif %}
+                </dl>
+
+              </div>
+            </details>
+
+          </article>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <div class="empty" data-reveal>
+        <div class="empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg>
+        </div>
+        <p style="color:var(--text-soft);margin-bottom:var(--s-lg)">You haven't submitted an idea yet.</p>
+        <a class="btn btn--accent" href="/submit-an-idea">Submit an idea</a>
+      </div>
+    {% endif %}
+
+{% else %}
+    {% comment %} Anonymous. Say so plainly — an empty list would read as "you have
+       not submitted anything", which is a different and wrong message. {% endcomment %}
+    <div class="empty" data-reveal>
+      <div class="empty__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <p style="color:var(--text-soft);margin-bottom:var(--s-lg)">Sign in with your Innovo account to see the ideas you've submitted.</p>
+      <a class="btn btn--accent" href="/SignIn?returnUrl=%2Fmy-ideas">Sign in</a>
+    </div>
+{% endif %}
+
+  </div>
+</section>
+
+{% include 'Innovo Labs Foot' %}

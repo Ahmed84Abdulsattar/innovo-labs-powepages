@@ -1,0 +1,193 @@
+{% comment %}
+=============================================================================
+  INNOVO LABS — Page head, header and nav
+  Power Pages Web Template · Name: "Innovo Labs Head"
+
+  Everything from <!DOCTYPE> down to the opening <main>. Every page
+  template opens with {% include 'Innovo Labs Head' %} and closes with
+  {% include 'Innovo Labs Foot' %}.
+
+  Why partials rather than a wrapping layout: Power Pages Liquid has no
+  block inheritance, so a page template cannot "extend" a shell. Each
+  page template must therefore emit a complete document itself.
+
+  The site-config row is fetched here because the nav and <head> need it.
+  Templates that need cfg or portal in their OWN markup must fetch it
+  again — assigns made inside an include do not leak back to the caller.
+=============================================================================
+{% endcomment %}
+
+{% comment %} ---- Load the single site-config row ---- {% endcomment %}
+{% fetchxml config %}
+<fetch top="1">
+  <entity name="innovo_siteconfig">
+    <attribute name="innovo_herovideourl" />
+    <attribute name="innovo_herovideowebm" />
+    <attribute name="innovo_heroposterurl" />
+    <attribute name="innovo_portalurl" />
+    <attribute name="innovo_campaigndeadline" />
+  </entity>
+</fetch>
+{% endfetchxml %}
+{% comment %} Guarded: Site config may hold no row yet, and indexing an
+   empty result set prints a Liquid error onto the page. {% endcomment %}
+{% assign cfg = false %}
+{% if config.results.entities.size > 0 %}{% assign cfg = config.results.entities[0] %}{% endif %}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% comment %} Never disable zoom — WCAG 1.4.4 {% endcomment %}
+
+  <title>{{ page.title | default: 'Innovo Labs' }} · Innovo Labs</title>
+  <meta name="description" content="{{ page.summary | escape | default: 'Evolve · Innovate · Lead — tracking, evaluating and onboarding technology innovation across Innovo.' }}">
+
+  <meta name="theme-color" content="#faf8f3">
+
+  {% comment %} Open Graph so links shared in Teams render a card {% endcomment %}
+  <meta property="og:title" content="{{ page.title | escape }}">
+  <meta property="og:description" content="{{ page.summary | escape }}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Innovo Labs">
+
+  {% comment %}
+    Preload the hero poster: it is the Largest Contentful Paint element
+    on the landing page, so it must not wait for CSS to be parsed.
+  {% endcomment %}
+  {% if cfg.innovo_heroposterurl %}
+    <link rel="preload" as="image" href="{{ cfg.innovo_heroposterurl | escape }}" fetchpriority="high">
+  {% endif %}
+
+  {% comment %} Only the two weights used above the fold — preloading all
+     four would compete with the hero poster for bandwidth. {% endcomment %}
+  <link rel="preload" as="font" type="font/woff2" href="/innovo-poppins-semibold.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/innovo-poppins-light.woff2" crossorigin>
+
+  <link rel="stylesheet" href="/innovo-labs.css">
+  <link rel="icon" href="/innovo-favicon.svg" type="image/svg+xml">
+
+  <script src="/innovo-labs.js" defer></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  {% comment %} ================= HEADER ================= {% endcomment %}
+  <header class="site-header">
+    <div class="wrap">
+      <nav class="nav" aria-label="Primary">
+
+        <a class="nav__logo" href="/" aria-label="Innovo Labs home">
+          {% comment %}
+            The supplied brand SVG embeds raster PNGs rather than paths,
+            so it cannot be recoloured by CSS. On this light theme the
+            original dark wordmark works as-is — just export it at 2x.
+            See SETUP.md §5.
+          {% endcomment %}
+          {% comment %}
+            width/height are the file's INTRINSIC pixels, not the display
+            size. They exist to reserve a correctly-shaped box before the
+            image arrives; CSS (height:28px, width:auto) does the sizing.
+
+            These read 240x26 for a long time — a ratio of 9.2 against the
+            file's true 7.4 — so every page load reserved a box wider and
+            shorter than the logo, painted it stretched, then snapped it
+            straight when the file landed. Keep these two numbers equal to
+            the asset's real dimensions; if the logo is ever re-exported,
+            update them with it.
+          {% endcomment %}
+          <img src="/innovo-labs-logo.webp"
+               alt="Innovo Labs"
+               width="1958" height="263">
+        </a>
+
+        <ul class="nav__links" id="nav-links">
+          {% comment %}
+            Navigation only — no action CTA. This site is read-only:
+            announcements and news. Nothing here asks the reader to
+            submit, apply or supply anything.
+
+            Champions and the Knowledge Hub live in the nav only, per
+            the brief: "don't show on homepage, only on navigation banner."
+          {% endcomment %}
+          {% comment %}
+            Left-to-right here mirrors top-to-bottom on the homepage, so the
+            nav doubles as a map of the site rather than an arbitrary list.
+            Reorder the sections and this must be reordered to match.
+
+            Every item points at its own page. These used to be homepage
+            anchors, which meant clicking "Partnerships" from /tracker sent
+            the reader home and dropped them mid-scroll, past a page they had
+            not asked for. A section that owns a page should be reached by
+            its page; the homepage teaser is the summary, not the address.
+
+            An item without a page keeps the /#anchor form and scrolls — see
+            the What we do / Innovators / Leadership links in the footer.
+          {% endcomment %}
+          {% comment %}
+            Explore Challenges leads deliberately, ahead of the site order.
+            It is the one item that asks the reader to do something rather
+            than read something, so it takes the first and most-clicked slot.
+          {% endcomment %}
+          <li><a class="nav__link" href="/challenges"   {% if page.url contains '/challenges' %}aria-current="page"{% endif %}>Explore Challenges</a></li>
+          <li><a class="nav__link" href="/tracker"      {% if page.url contains '/tracker' %}aria-current="page"{% endif %}>Innovation Tracker</a></li>
+          <li><a class="nav__link" href="/news"         {% if page.url contains '/news' %}aria-current="page"{% endif %}>Inside Innovo Labs</a></li>
+          <li><a class="nav__link" href="/partnerships" {% if page.url contains '/partnerships' %}aria-current="page"{% endif %}>Partnerships</a></li>
+          <li><a class="nav__link" href="/champions"    {% if page.url contains '/champions' %}aria-current="page"{% endif %}>Labs Champions</a></li>
+          {% comment %} Two portal states, two links. The Entra session and the Power
+             Pages session expire independently, so a reader can be signed in to
+             Microsoft while the portal still sees them as anonymous. Showing
+             nothing in that case looked like a missing feature; showing "Sign in"
+             names what actually happened and fixes it in one click. {% endcomment %}
+          {% if user %}
+          <li><a class="nav__link" href="/my-ideas" {% if page.url contains '/my-ideas' %}aria-current="page"{% endif %}>My Ideas</a></li>
+          {% else %}
+          <li><a class="nav__link nav__link--signin" href="/SignIn?returnUrl={{ page.url | url_encode }}">Sign in</a></li>
+          {% endif %}
+
+          {% comment %}
+            Support. A mailto rather than a form: there is no ticketing
+            system behind this, the destination is a shared mailbox, and a
+            form would need a flow, a table and a table permission to do
+            what the reader's own mail client already does. It also works
+            when the reader is anonymous, which a form posting to Dataverse
+            would not.
+
+            The body is hand-percent-encoded, not piped through url_encode —
+            that filter emits '+' for a space, which mail clients render as
+            a literal plus inside a body. %20 is safe everywhere.
+
+            page.url is appended so support knows which page the reader was
+            on without having to ask. It is a path ('/tracker'), so it needs
+            no encoding; page.title is deliberately left out because titles
+            contain spaces and would reintroduce the problem above.
+          {% endcomment %}
+          <li><a class="nav__link nav__link--support"
+                 aria-label="Need support? Opens a new email"
+                 href="mailto:Innovo.labs@innovogroup.com?subject=Innovo%20Labs%20support%20request&body=Hi%20Innovo%20Labs%20team%2C%0D%0A%0D%0A%5BDescribe%20the%20issue%20or%20what%20you%20need%20help%20with%5D%0D%0A%0D%0A%0D%0A---%0D%0APage%3A%20{{ page.url }}">
+            <svg class="nav__support-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M9.6 9.3a2.5 2.5 0 1 1 3.3 2.4c-.7.25-1.1.85-1.1 1.6v.3"/>
+              <path d="M12 17.1h.01"/>
+            </svg>
+            <span class="nav__support-label">Need support?</span>
+          </a></li>
+        </ul>
+
+        <button class="nav__toggle" type="button"
+                aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" aria-hidden="true">
+            <path d="M3 12h18M3 6h18M3 18h18"/>
+          </svg>
+        </button>
+
+      </nav>
+    </div>
+  </header>
+
+  {% comment %} ================= PAGE BODY ================= {% endcomment %}
+  <main id="main">
